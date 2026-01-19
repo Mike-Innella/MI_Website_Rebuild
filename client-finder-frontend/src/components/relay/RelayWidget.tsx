@@ -38,7 +38,7 @@ export default function RelayWidget() {
   });
   const [showLauncher, setShowLauncher] = useState(false);
   const [open, setOpen] = useState(false);
-  const [sessionId, setSessionId] = useState(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -86,7 +86,7 @@ export default function RelayWidget() {
     }
   }, [sessionId]);
 
-  const sendMessage = async (text) => {
+  const sendMessage = async (text: any) => {
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
 
@@ -266,9 +266,9 @@ export default function RelayWidget() {
                   borderColor: "divider",
                 }}
               >
-                <Box className="relay-dot" style={{ "--relay-delay": "0ms" }} />
-                <Box className="relay-dot" style={{ "--relay-delay": "160ms" }} />
-                <Box className="relay-dot" style={{ "--relay-delay": "320ms" }} />
+                <Box className="relay-dot" style={{ "--relay-delay": "0ms" } as any} />
+                <Box className="relay-dot" style={{ "--relay-delay": "160ms" } as any} />
+                <Box className="relay-dot" style={{ "--relay-delay": "320ms" } as any} />
               </Box>
             ) : null}
           </Stack>

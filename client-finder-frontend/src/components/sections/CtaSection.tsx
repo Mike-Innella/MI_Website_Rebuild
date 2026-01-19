@@ -187,7 +187,7 @@ export default function CtaSection() {
         <Grid size={{ xs: 12, md: 6 }}>
           <Card
             className="reveal"
-            style={{ "--delay": "80ms" }}
+            style={{ "--delay": "80ms" } as any}
             sx={{
               borderRadius: "var(--radius-card)",
               ...primarySurface(theme.palette.mode),
@@ -372,7 +372,7 @@ export default function CtaSection() {
           </Card>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Stack spacing={2.5} className="reveal" style={{ "--delay": "140ms" }}>
+          <Stack spacing={2.5} className="reveal" style={{ "--delay": "140ms" } as any}>
             <Card
               sx={{
                 borderRadius: "var(--radius-card)",

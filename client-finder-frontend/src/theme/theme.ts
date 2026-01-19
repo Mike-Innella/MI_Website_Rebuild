@@ -31,7 +31,7 @@ const DARK = {
 };
 
 export const getAppTheme = (mode = "light") => {
-  const palette = mode === "dark" ? DARK : LIGHT;
+  const palette = (mode === "dark" ? DARK : LIGHT) as any;
   const shadows = Array.from({ length: 25 }, (_, index) => {
     if (index === 0) return "none";
     if (index < 4) {
@@ -42,7 +42,7 @@ export const getAppTheme = (mode = "light") => {
     return mode === "dark"
       ? "0 18px 45px rgba(0, 0, 0, 0.4)"
       : "0 18px 45px rgba(15, 23, 42, 0.16)";
-  });
+  }) as any;
 
   return createTheme({
     palette,

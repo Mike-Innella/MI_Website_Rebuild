@@ -5,15 +5,15 @@ import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import { useServerInsertedHTML } from "next/navigation";
 
-export default function ThemeRegistry({ children }) {
+export default function ThemeRegistry({ children }: any) {
   const [{ cache, flush }] = React.useState(() => {
-    const cache = createCache({ key: "css", prepend: true });
+    const cache = createCache({ key: "css", prepend: true }) as any;
     cache.compat = true;
     const prevInsert = cache.insert;
-    let inserted = [];
+    let inserted: string[] = [];
 
-    cache.insert = (...args) => {
-      const serialized = args[1];
+    cache.insert = (...args: any[]) => {
+      const serialized = args[1] as any;
       if (cache.inserted[serialized.name] === undefined) {
         inserted.push(serialized.name);
       }

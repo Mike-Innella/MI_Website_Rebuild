@@ -121,7 +121,7 @@ export default function HeroSection() {
                 spacing={1.5}
                 alignItems="stretch"
                 className="reveal"
-                style={{ "--delay": "40ms" }}
+                style={{ "--delay": "40ms" } as any}
                 sx={{ width: "100%", maxWidth: { xs: "100%", md: 560 } }}
               >
                 {heroHighlights.map((item) => {
@@ -172,7 +172,7 @@ export default function HeroSection() {
                   color: theme.palette.mode === "dark" ? "common.white" : "text.primary",
                 }}
                 className="reveal"
-                style={{ "--delay": "120ms" }}
+                style={{ "--delay": "120ms" } as any}
               >
                 <Box component="span" sx={{ display: "block" }}>
                   Fast, modern websites that get more customers to reach out.
@@ -192,7 +192,7 @@ export default function HeroSection() {
                       : "text.secondary",
                 }}
                 className="reveal"
-                style={{ "--delay": "200ms" }}
+                style={{ "--delay": "200ms" } as any}
               >
                 For small businesses that want more calls and inquiries without tech hassles. I rebuild your site so it
                 loads fast, reads clearly, and points visitors to one next step.
@@ -200,7 +200,7 @@ export default function HeroSection() {
 
               <Box
                 className="reveal"
-                style={{ "--delay": "260ms" }}
+                style={{ "--delay": "260ms" } as any}
                 sx={{
                   pt: 3,
                   pb: 1.5,
@@ -239,7 +239,7 @@ export default function HeroSection() {
               <Paper
                 variant="outlined"
                 className="reveal"
-                style={{ "--delay": "360ms" }}
+                style={{ "--delay": "360ms" } as any}
                 sx={{
                   mt: 2,
                   p: 2,
@@ -283,7 +283,7 @@ export default function HeroSection() {
             <Stack
               spacing={2}
               className="reveal"
-              style={{ "--delay": "200ms" }}
+              style={{ "--delay": "200ms" } as any}
               sx={{ maxWidth: 520, ml: { md: "auto" } }}
             >
               <Paper

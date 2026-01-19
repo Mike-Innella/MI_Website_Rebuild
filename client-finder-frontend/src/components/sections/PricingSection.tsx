@@ -101,7 +101,7 @@ export default function PricingSection() {
           <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 2, md: 1 } }}>
             <Card
               className="reveal"
-              style={{ "--delay": "40ms" }}
+              style={{ "--delay": "40ms" } as any}
               sx={{
                 borderRadius: "var(--radius-card)",
                 ...secondarySurface,
@@ -204,7 +204,7 @@ export default function PricingSection() {
           <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 1, md: 2 } }}>
             <Card
               className="reveal pulse-border"
-              style={{ "--delay": "80ms" }}
+              style={{ "--delay": "80ms" } as any}
               sx={{
                 borderRadius: "var(--radius-card)",
                 ...primarySurface(theme.palette.mode),
@@ -331,7 +331,7 @@ export default function PricingSection() {
           <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 3, md: 3 } }}>
             <Card
               className="reveal"
-              style={{ "--delay": "140ms" }}
+              style={{ "--delay": "140ms" } as any}
               sx={{
                 borderRadius: "var(--radius-card)",
                 height: "100%",

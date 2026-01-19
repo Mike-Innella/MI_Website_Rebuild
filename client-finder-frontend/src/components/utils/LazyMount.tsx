@@ -2,8 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function LazyMount({ fallback = null, children, rootMargin = "300px" }) {
-  const ref = useRef(null);
+export default function LazyMount({ fallback = null, children, rootMargin = "300px" }: any) {
+  const ref = useRef<any>(null);
   const [show, setShow] = useState(false);
 
   useEffect(() => {
