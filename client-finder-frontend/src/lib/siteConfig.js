@@ -9,6 +9,19 @@ export const siteConfig = {
   orgName: "M. I. Website Rebuilds",
   logoPath: "/assets/MILogo.png",
   faviconPath: "/assets/favicon.ico",
+  socialImagePath: "/assets/MILogo.png",
+  locale: "en_US",
+  language: "en-US",
+  keywords: [
+    "website rebuild",
+    "small business website",
+    "conversion-focused design",
+    "website redesign",
+    "performance optimization",
+    "seo upgrade",
+    "landing page",
+    "web development",
+  ],
 };
 
 export const jsonLd = {
@@ -19,14 +32,30 @@ export const jsonLd = {
       "@id": `${siteUrl}/#organization`,
       name: siteConfig.orgName,
       url: siteUrl,
-      logo: `${siteUrl}${siteConfig.logoPath}`,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}${siteConfig.logoPath}`,
+      },
+      description: siteConfig.description,
     },
     {
       "@type": "WebSite",
       "@id": `${siteUrl}/#website`,
       name: siteConfig.siteName,
       url: siteUrl,
+      description: siteConfig.description,
+      inLanguage: siteConfig.language,
       publisher: { "@id": `${siteUrl}/#organization` },
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${siteUrl}/#webpage`,
+      url: siteUrl,
+      name: siteConfig.siteName,
+      description: siteConfig.description,
+      inLanguage: siteConfig.language,
+      isPartOf: { "@id": `${siteUrl}/#website` },
+      about: { "@id": `${siteUrl}/#organization` },
     },
   ],
 };

@@ -6,14 +6,60 @@ import RelayWidget from "@/components/relay/RelayWidget";
 import { siteConfig, siteUrl } from "@/lib/siteConfig";
 
 export const metadata = {
-  title: siteConfig.siteName,
+  title: {
+    default: siteConfig.siteName,
+    template: `%s | ${siteConfig.siteName}`,
+  },
   description: siteConfig.description,
   metadataBase: new URL(siteUrl),
   alternates: {
     canonical: "/",
   },
+  keywords: siteConfig.keywords,
+  applicationName: siteConfig.siteName,
+  creator: siteConfig.orgName,
+  publisher: siteConfig.orgName,
+  category: "Business",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    title: siteConfig.siteName,
+    description: siteConfig.description,
+    url: siteUrl,
+    siteName: siteConfig.siteName,
+    locale: siteConfig.locale,
+    type: "website",
+    images: [
+      {
+        url: siteConfig.socialImagePath,
+        alt: `${siteConfig.siteName} logo`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.siteName,
+    description: siteConfig.description,
+    images: [siteConfig.socialImagePath],
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: siteConfig.faviconPath,
+    shortcut: siteConfig.faviconPath,
+    apple: siteConfig.logoPath,
   },
 };
 

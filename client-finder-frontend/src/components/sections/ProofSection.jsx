@@ -151,6 +151,7 @@ export default function ProofSection() {
                     py: 0.5,
                     borderRadius: "999px",
                     backgroundColor: "rgba(15, 23, 42, 0.7)",
+                    display: { xs: "none", sm: "inline-flex" },
                   }}
                 >
                   <Typography variant="caption" color="common.white">
@@ -167,13 +168,16 @@ export default function ProofSection() {
                     rel="noreferrer"
                     sx={{
                       position: "absolute",
-                      top: 12,
+                      top: { xs: "auto", sm: 12 },
                       right: 12,
+                      bottom: { xs: 12, sm: "auto" },
                       borderRadius: "999px",
                       backgroundColor: "rgba(15, 23, 42, 0.7)",
                       color: "common.white",
                       borderColor: "rgba(255, 255, 255, 0.4)",
                       transform: "none",
+                      zIndex: 2,
+                      display: { xs: "none", sm: "inline-flex" },
                       transition:
                         "background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease",
                       "&:hover": {
@@ -187,6 +191,43 @@ export default function ProofSection() {
                   </Button>
                 ) : null}
               </Box>
+              {project.link ? (
+                <Box
+                  sx={{
+                    display: { xs: "flex", sm: "none" },
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    p: 2,
+                    pt: 1.5,
+                    borderTop: "1px solid",
+                    borderColor: "divider",
+                    backgroundColor: "background.paper",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: "999px",
+                      backgroundColor: "rgba(15, 23, 42, 0.7)",
+                    }}
+                  >
+                    <Typography variant="caption" color="common.white">
+                      {project.title}
+                    </Typography>
+                  </Box>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    component="a"
+                    href={project.link}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View live site
+                  </Button>
+                </Box>
+              ) : null}
             </Card>
           </Grid>
         </Grid>

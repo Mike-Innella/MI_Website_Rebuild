@@ -11,6 +11,7 @@ export function createApp() {
   app.use(express.json({ limit: "1mb" }));
 
   app.use(corsMiddleware);
+  app.options("*", corsMiddleware);
 
   app.use(apiRateLimit);
   app.use("/api", healthRouter);
