@@ -5,23 +5,8 @@ import { Box, Button, Card, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { useTheme } from "@mui/material/styles";
 import Section from "@/components/layout/Section";
-
-const projects = [
-  {
-    title: "Howard Motor Co.",
-    description: "Rebuilt the site for clarity, stronger contact paths, and a mobile-first browsing experience.",
-    before: "Buried contact info and slow mobile pages made it hard to book a visit.",
-    after: "Simplified navigation, bold tap-to-call, and faster load times across devices.",
-    resultLine: "Helped an automotive business increase contact form fills by making their site simpler.",
-    industry: "Home services",
-    outcomes: [
-      "Clarified the contact path to an actionable item.",
-      "Streamlined navigation so core services surface faster.",
-      "Rebuilt the mobile layout for speed and trust.",
-    ],
-    link: "https://www.howardmotorco.net/",
-  },
-];
+import { maxHeroWidth } from "@/lib/layoutTokens";
+import { cardPad, secondarySurface } from "@/lib/uiStyles";
 
 export default function ProofSection() {
   const theme = useTheme();
@@ -32,11 +17,11 @@ export default function ProofSection() {
 
   return (
     <Section
-      id="proof"
-      eyebrow="Proof"
-      title="This is what happens when I rebuild"
-      subtitle="A before/after example that shows the pattern: clarity, flow, and a clear next step."
-      variant="plain"
+      id="recent-rebuild"
+      eyebrow="Recent Rebuild"
+      title="Howard Motor Co. — inspection and repair site"
+      subtitle="A clear example of the outcome pattern: clearer messaging → easier contact → more inquiries."
+      variant="tinted"
       disableSpine
       sx={{
         "&::after": {
@@ -53,63 +38,77 @@ export default function ProofSection() {
         },
       }}
     >
-      {projects.map((project, index) => (
-        <Box
-          key={project.title}
-          sx={{
-            mx: "auto",
-            maxWidth: 1200,
-            px: { xs: 2, md: 3 },
-          }}
-        >
-          <Grid container spacing={{ xs: 4, md: 5 }} alignItems="stretch">
-            <Grid size={{ xs: 12, lg: 5 }} sx={{ display: "flex", height: "100%" }}>
-              <Stack
-                spacing={2.25}
-                className="reveal"
-                style={{ "--delay": `${80 + index * 80}ms` } as any}
-                sx={{ height: "100%", justifyContent: "center" }}
-              >
-                <Typography variant="overline" color="text.secondary">
-                  Outcome pattern
-                </Typography>
-                <Typography variant="h5">{project.title}</Typography>
-                <Typography color="text.secondary">{project.description}</Typography>
-                <Stack spacing={1.25}>
-                  {project.outcomes.map((item) => (
-                    <Stack key={item} direction="row" spacing={1.5} alignItems="flex-start">
-                      <Box
-                        sx={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: "50%",
-                          display: "grid",
-                          placeItems: "center",
-                          bgcolor: lightMode
-                            ? "rgba(11, 61, 145, 0.1)"
-                            : "rgba(93, 169, 255, 0.18)",
-                          flexShrink: 0,
-                        }}
-                      >
+      <Card
+        sx={{
+          mx: "auto",
+          maxWidth: maxHeroWidth,
+          ...secondarySurface,
+          borderRadius: "var(--radius-card)",
+          p: cardPad,
+          position: "relative",
+          overflow: "hidden",
+          boxShadow: "var(--shadow-soft)",
+        }}
+      >
+        <Grid container spacing={{ xs: 4, md: 5 }} alignItems="stretch" sx={{ mt: { xs: 3, md: 0 } }}>
+          <Grid size={{ xs: 12, lg: 6 }} sx={{ display: "flex" }}>
+            <Stack spacing={2.25} sx={{ height: "100%", justifyContent: "flex-start" }}>
+              <Typography variant="overline" color="text.secondary">
+                RECENT REBUILD
+              </Typography>
+              <Stack spacing={1.75}>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Client type
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>
+                    Local small business (auto inspection + repair)
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Problem
+                  </Typography>
+                  <Typography color="text.secondary">
+                    Buried contact info, unclear services, low mobile conversions.
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    What changed
+                  </Typography>
+                  <Stack spacing={1.1} sx={{ mt: 0.5 }}>
+                    {[
+                      "Simplified navigation so core services surface faster.",
+                      "Made contact paths obvious (tap-to-call + clear CTA).",
+                      "Tightened mobile layout for speed and trust.",
+                    ].map((item) => (
+                      <Stack key={item} direction="row" spacing={1.5} alignItems="flex-start">
                         <Box
                           sx={{
-                            width: 10,
-                            height: 10,
+                            width: 9,
+                            height: 9,
                             borderRadius: "50%",
                             bgcolor: "primary.main",
+                            flexShrink: 0,
+                            transform: "translateY(6px)",
                           }}
                         />
-                      </Box>
-                      <Typography color="text.secondary">{item}</Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {project.resultLine}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Industries served: landscaping, contractors, and home services.
-                </Typography>
+                        <Typography color="text.secondary">{item}</Typography>
+                      </Stack>
+                    ))}
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Result
+                  </Typography>
+                  <Typography color="text.secondary">
+                    Clearer customer understanding and increased inbound inquiries.
+                  </Typography>
+                </Box>
+              </Stack>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 1 }}>
                 <Button
                   variant="contained"
                   size="large"
@@ -117,159 +116,125 @@ export default function ProofSection() {
                     const el = document.getElementById("cta");
                     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
-                  sx={{ mt: 0.5 }}
                 >
-                  Get a free site review
+                Request a Review (Recorded)
+              </Button>
+                <Button
+                  size="large"
+                  variant="outlined"
+                  component="a"
+                  href="https://www.howardmotorco.net/"
+                  target="_blank"
+                  rel="noreferrer"
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  View live site
                 </Button>
               </Stack>
-            </Grid>
-            <Grid size={{ xs: 12, lg: 7 }} sx={{ display: "flex", height: "100%" }}>
-              <Stack spacing={2} sx={{ height: "100%", width: "100%" }}>
-                <Card
-                  className="reveal"
-                  style={{ "--delay": `${140 + index * 80}ms` } as any}
+            </Stack>
+          </Grid>
+          <Grid size={{ xs: 12, lg: 6 }}>
+            <Stack spacing={2.5} sx={{ height: "100%" }}>
+              <Box
+                sx={{
+                  position: "relative",
+                  width: "100%",
+                  borderRadius: "var(--radius-card)",
+                  overflow: "hidden",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  minHeight: { xs: 240, md: 320 },
+                  boxShadow: "var(--shadow-soft)",
+                }}
+              >
+                <Image
+                  src="/assets/howmoco.png"
+                  alt="Howard Motor Company homepage preview"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 1200px) 100vw, 720px"
+                  loading="lazy"
+                />
+                <Box
                   sx={{
-                    flex: 1,
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    bgcolor: "rgba(255,255,255,0.03)",
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(180deg, rgba(15, 23, 42, 0) 40%, rgba(15, 23, 42, 0.55) 100%)",
                   }}
-                  variant="outlined"
-                >
-                  <Box
-                    sx={{
-                      position: "relative",
-                      width: "100%",
-                      aspectRatio: { xs: "16 / 10", md: "16 / 9" },
-                      maxHeight: { md: 520, lg: 560 },
-                      flexGrow: 1,
-                      minHeight: { xs: 260, md: 340 },
-                    }}
-                  >
-                    <Image
-                      src="/assets/howmoco.png"
-                      alt={`${project.title} homepage preview`}
-                      fill
-                      style={{ objectFit: "cover" }}
-                      sizes="(max-width: 1200px) 100vw, 720px"
-                      loading="lazy"
-                    />
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(180deg, rgba(15, 23, 42, 0) 40%, rgba(15, 23, 42, 0.55) 100%)",
-                      }}
-                    />
-                  </Box>
-                  <Box
+                />
+              </Box>
+              <Box
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: "var(--radius-card)",
+                  p: cardPad,
+                  backgroundColor: "background.paper",
+                  boxShadow: "var(--shadow-soft)",
+                }}
+              >
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                  <Typography variant="subtitle2" component="span" sx={{ lineHeight: 1.2 }}>
+                    Before
+                  </Typography>
+                  <Typography
+                    variant="subtitle2"
+                    component="span"
                     sx={{
                       display: "flex",
-                      justifyContent: "space-between",
                       alignItems: "center",
-                      gap: 2,
-                      p: 2,
-                      pt: 1.5,
-                      borderTop: "1px solid",
-                      borderColor: "divider",
-                      backgroundColor: "background.paper",
+                      lineHeight: 1,
+                      fontSize: "1em",
+                      position: "relative",
+                      top: "-3px",
                     }}
                   >
+                    →
+                  </Typography>
+                  <Typography variant="subtitle2" component="span" sx={{ lineHeight: 1.2 }}>
+                    After (at a glance)
+                  </Typography>
+                </Stack>
+                <Stack spacing={1.1}>
+                  <Stack direction="row" spacing={1.25} alignItems="flex-start">
                     <Box
                       sx={{
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: "999px",
-                        backgroundColor: "rgba(15, 23, 42, 0.7)",
+                        mt: 0,
+                        width: 9,
+                        height: 9,
+                        borderRadius: "50%",
+                        bgcolor: "primary.main",
+                        flexShrink: 0,
+                        transform: "translateY(6px)",
                       }}
-                    >
-                      <Typography variant="caption" color="common.white">
-                        {project.title}
-                      </Typography>
-                    </Box>
-                    {project.link ? (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        component="a"
-                        href={project.link}
-                        target="_blank"
-                        rel="noreferrer"
-                        sx={{ whiteSpace: "nowrap" }}
-                      >
-                        View live site
-                      </Button>
-                    ) : null}
-                  </Box>
-                </Card>
-
-                <Card variant="outlined" sx={{ p: 2, borderRadius: 3 }}>
-                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-                    <Typography variant="subtitle2" component="span" sx={{ lineHeight: 1.2 }}>
-                      Before
+                    />
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+                      Before: Buried contact info and slow mobile pages made it hard to book a visit.
                     </Typography>
-                    <Typography
-                      variant="subtitle2"
-                      component="span"
+                  </Stack>
+                  <Stack direction="row" spacing={1.25} alignItems="flex-start">
+                    <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        lineHeight: 1,
-                        fontSize: "1em",
-                        position: "relative",
-                        top: "-3px",
+                        mt: 0,
+                        width: 9,
+                        height: 9,
+                        borderRadius: "50%",
+                        bgcolor: "primary.main",
+                        flexShrink: 0,
+                        transform: "translateY(6px)",
                       }}
-                    >
-                      →
-                    </Typography>
-                    <Typography variant="subtitle2" component="span" sx={{ lineHeight: 1.2 }}>
-                      After, at a glance
+                    />
+                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+                      After: Simplified navigation, bold tap-to-call, and faster load times across devices.
                     </Typography>
                   </Stack>
-                  <Stack spacing={0.9}>
-                    <Stack direction="row" spacing={1.25} alignItems="flex-start">
-                      <Box
-                        sx={{
-                          mt: 0,
-                          width: 9,
-                          height: 9,
-                          borderRadius: "50%",
-                          bgcolor: "primary.main",
-                          flexShrink: 0,
-                          transform: "translateY(6px)",
-                        }}
-                      />
-                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-                        Before: Buried contact info and slow mobile pages made it hard to book a visit.
-                      </Typography>
-                    </Stack>
-                    <Stack direction="row" spacing={1.25} alignItems="flex-start">
-                      <Box
-                        sx={{
-                          mt: 0,
-                          width: 9,
-                          height: 9,
-                          borderRadius: "50%",
-                          bgcolor: "success.main",
-                          flexShrink: 0,
-                          transform: "translateY(6px)",
-                        }}
-                      />
-                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-                        After: Simplified navigation, bold tap-to-call, and faster load times across devices.
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </Card>
-              </Stack>
-            </Grid>
+                </Stack>
+              </Box>
+            </Stack>
           </Grid>
-        </Box>
-      ))}
+        </Grid>
+      </Card>
     </Section>
   );
 }

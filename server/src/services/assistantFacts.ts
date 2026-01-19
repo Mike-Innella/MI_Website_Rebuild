@@ -20,7 +20,7 @@ export async function getAssistantFacts(limit = 18) {
     `
     select fact_key, fact_value, tags, source, priority
     from public.assistant_facts
-    order by priority asc, updated_at desc
+    order by priority desc, updated_at desc
     limit $1
     `,
     [lim],

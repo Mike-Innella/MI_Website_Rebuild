@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
+import { cardPad, primarySurface, secondarySurface } from "@/lib/uiStyles";
 
 export default function Footer() {
   const theme = useTheme();
@@ -122,36 +123,29 @@ export default function Footer() {
               sx={{
                 width: { xs: "100%", md: 460 },
                 borderRadius: "var(--radius-card)",
-                border: "1px solid",
-                borderColor: "divider",
-                px: { xs: 2.5, md: 3 },
-                py: { xs: 2.5, md: 3 },
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(20, 27, 39, 0.85)"
-                    : "rgba(255, 255, 255, 0.9)",
-                boxShadow: "var(--shadow-soft)",
+                ...primarySurface(theme.palette.mode),
+                px: cardPad,
+                py: cardPad,
+                boxShadow: "var(--shadow-strong)",
               }}
             >
               <Stack spacing={1.5}>
-                <Typography variant="h6">Get a free site review</Typography>
+                <Typography variant="h6">Request a Review (Recorded)</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Send me your site and I&apos;ll tell you what to fix first.
                 </Typography>
                 <Button
                   onClick={scrollToCta}
                   variant="contained"
+                  size="large"
                   sx={{
                     alignSelf: "flex-start",
                     mt: 0.5,
-                    backgroundColor: "primary.main",
-                    color: "primary.contrastText",
-                    "&:hover": {
-                      backgroundColor: "primary.dark",
-                    },
+                    borderRadius: "var(--radius-pill)",
+                    px: 3,
                   }}
                 >
-                  Get a free site review
+                  Request a Review (Recorded)
                 </Button>
               </Stack>
             </Box>
@@ -188,19 +182,28 @@ export default function Footer() {
         aria-labelledby="footer-dialog-title"
         maxWidth="sm"
         fullWidth
+        BackdropProps={{
+          sx: {
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            backgroundColor: theme.palette.mode === "dark" ? "rgba(10, 15, 24, 0.55)" : "rgba(10, 15, 24, 0.35)",
+          },
+        }}
         PaperProps={{
           sx: {
             borderRadius: "var(--radius-card)",
-            border: "1px solid",
-            borderColor: "divider",
+            ...secondarySurface,
+            boxShadow: "var(--shadow-soft)",
           },
         }}
       >
-        <DialogTitle id="footer-dialog-title">{activeContent?.title}</DialogTitle>
-        <DialogContent>
+        <DialogTitle id="footer-dialog-title" sx={{ fontWeight: 800 }}>
+          {activeContent?.title}
+        </DialogTitle>
+        <DialogContent sx={{ pt: 0, pb: 2 }}>
           <Typography color="text.secondary">{activeContent?.body}</Typography>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ pr: 2, pb: 2 }}>
           <Button onClick={() => setActiveModal(null)}>Close</Button>
         </DialogActions>
       </Dialog>

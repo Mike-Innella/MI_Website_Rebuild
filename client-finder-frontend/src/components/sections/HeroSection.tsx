@@ -1,70 +1,47 @@
 "use client";
 
-import Image from "next/image";
 import {
   Box,
-  Button,
   Container,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import { useTheme } from "@mui/material/styles";
-import { useEffect, useState } from "react";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
-import PhoneIphoneOutlinedIcon from "@mui/icons-material/PhoneIphoneOutlined";
-import TrackChangesOutlinedIcon from "@mui/icons-material/TrackChangesOutlined";
+import { useTheme } from "@mui/material/styles";
+import Grid from "@mui/material/Grid";
 import { maxHeroWidth, maxTextWidth, sectionPaddingY } from "@/lib/layoutTokens";
-import { cardPad, mutedSurface, primarySurface } from "@/lib/uiStyles";
 
-const previewSteps = [
-  { label: "See what you get", detail: "Faster, clearer, easier", sectionId: "problems" },
-  { label: "How I rebuild", detail: "7-day turnaround", sectionId: "offer" },
-  { label: "Proof of outcomes", detail: "Before vs after", sectionId: "proof" },
+const heroOptions = [
+  {
+    title: "My site needs credibility",
+    caption: "You want it to look professional and trustworthy.",
+    targetId: "cta",
+    cta: "Request a Review (Recorded)",
+  },
+  {
+    title: "My site isn’t getting inquiries",
+    caption: "You want more people to contact you.",
+    targetId: "cta",
+    cta: "Request a Review (Recorded)",
+  },
+  {
+    title: "I’m ready to rebuild",
+    caption: "You want a clear plan for the new site before starting.",
+    targetId: "cta",
+    cta: "Request a Review (Recorded)",
+  },
 ];
 
-const heroHighlights = [
-  { icon: BoltOutlinedIcon, label: "7-day turnaround", accent: true },
-  { icon: PhoneIphoneOutlinedIcon, label: "Mobile-first" },
-  { icon: TrackChangesOutlinedIcon, label: "Lead-focused" },
-];
+function scrollToId(id: string) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
 
 export default function HeroSection() {
   const theme = useTheme();
-  const [activeStep, setActiveStep] = useState(0);
-  const [showPricing, setShowPricing] = useState(false);
-
-  useEffect(() => {
-    const revealTimeout = window.setTimeout(() => setShowPricing(true), 1200);
-    const handleScroll = () => {
-      if (window.scrollY > 40) {
-        setShowPricing(true);
-      }
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.clearTimeout(revealTimeout);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % previewSteps.length);
-    }, 2800);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
-
-  const scrollToCta = () => {
-    const el = document.getElementById("cta");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
 
   return (
     <Box
@@ -76,7 +53,7 @@ export default function HeroSection() {
         overflow: "hidden",
         background:
           theme.palette.mode === "dark"
-            ? `linear-gradient(180deg, rgba(93, 169, 255, 0.18) 0%, ${theme.palette.background.default} 100%)`
+            ? `linear-gradient(180deg, rgba(93, 169, 255, 0.2) 0%, ${theme.palette.background.default} 100%)`
             : `linear-gradient(180deg, rgba(11, 61, 145, 0.16) 0%, ${theme.palette.background.default} 100%)`,
       }}
     >
@@ -91,7 +68,7 @@ export default function HeroSection() {
           background:
             theme.palette.mode === "dark"
               ? "radial-gradient(circle, rgba(93, 169, 255, 0.35), transparent 70%)"
-              : "radial-gradient(circle, rgba(11, 61, 145, 0.3), transparent 70%)",
+              : "radial-gradient(circle, rgba(11, 61, 145, 0.24), transparent 70%)",
           opacity: 0.7,
         }}
       />
@@ -108,318 +85,99 @@ export default function HeroSection() {
         }}
       />
       <Container maxWidth="lg" className="ui-max" sx={{ px: { xs: 2, md: 3 } }}>
-        <Grid
-          container
-          spacing={{ xs: 5, md: 7 }}
-          alignItems="flex-start"
-          sx={{ maxWidth: maxHeroWidth, mx: "auto" }}
-        >
-          <Grid size={{ xs: 12, md: 7 }}>
-            <Stack spacing={3} sx={{ maxWidth: { xs: "100%", md: 720 } }}>
-              <Stack
-                direction={{ xs: "column", sm: "row" }}
-                spacing={1.5}
-                alignItems="stretch"
-                className="reveal"
-                style={{ "--delay": "40ms" } as any}
-                sx={{ width: "100%", maxWidth: { xs: "100%", md: 560 } }}
-              >
-                {heroHighlights.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Paper
-                      key={item.label}
-                      variant="outlined"
-                      sx={{
-                        borderRadius: "var(--radius-pill)",
-                        px: 2,
-                        py: 0.75,
-                        borderColor: "divider",
-                        boxShadow: "none",
-                        bgcolor:
-                          theme.palette.mode === "dark"
-                            ? "rgba(15, 23, 42, 0.45)"
-                            : "rgba(15, 23, 42, 0.04)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 0.75,
-                        flex: 1,
-                        minWidth: 0,
-                        textAlign: "center",
-                      }}
-                    >
-                      <Icon fontSize="small" color={item.accent ? "primary" : "action"} />
-                      <Typography
-                        variant="caption"
-                        sx={{ fontWeight: 600, color: item.accent ? "text.primary" : "text.secondary" }}
-                      >
-                        {item.label}
-                      </Typography>
-                    </Paper>
-                  );
-                })}
-              </Stack>
+        <Box sx={{ maxWidth: maxHeroWidth, mx: "auto" }}>
+          <Stack spacing={{ xs: 3, md: 4 }} sx={{ textAlign: "left" }}>
+            <Typography
+              component="h1"
+              variant="h1"
+              fontWeight={900}
+              sx={{
+                letterSpacing: "-0.03em",
+                lineHeight: 1.04,
+                maxWidth: { xs: "100%", md: maxTextWidth },
+              }}
+              className="reveal"
+            >
+              Websites built to convert — delivered fast.
+            </Typography>
 
-              <Typography
-                component="h1"
-                variant="h1"
-                fontWeight={900}
-                sx={{
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.05,
-                  maxWidth: { xs: "100%", md: 620 },
-                  color: theme.palette.mode === "dark" ? "common.white" : "text.primary",
-                }}
-                className="reveal"
-                style={{ "--delay": "120ms" } as any}
-              >
-                <Box component="span" sx={{ display: "block" }}>
-                  Fast, modern websites that get more customers to reach out.
-                </Box>
-                <Box component="span" sx={{ display: "block", mt: 0.25 }}>
-                  7-day rebuild — no tech headaches.
-                </Box>
-              </Typography>
+            <Typography
+              variant="h6"
+              sx={{
+                maxWidth: maxTextWidth,
+                color: theme.palette.mode === "dark" ? "rgba(229, 231, 235, 0.82)" : "text.secondary",
+              }}
+              className="reveal"
+              style={{ "--delay": "80ms" } as any}
+            >
+              If your website looks fine but isn’t getting inquiries, this is for you. I record a short review and show
+              exactly what’s blocking conversions.
+            </Typography>
 
-              <Typography
-                variant="h6"
-                sx={{
-                  maxWidth: maxTextWidth,
-                  color:
-                    theme.palette.mode === "dark"
-                      ? "rgba(229, 231, 235, 0.8)"
-                      : "text.secondary",
-                }}
-                className="reveal"
-                style={{ "--delay": "200ms" } as any}
-              >
-                For small businesses that want more calls and inquiries without tech hassles. I rebuild your site so it
-                loads fast, reads clearly, and points visitors to one next step.
-              </Typography>
-
-              <Box
-                className="reveal"
-                style={{ "--delay": "260ms" } as any}
-                sx={{
-                  pt: 3,
-                  pb: 1.5,
-                  borderTop: `1px solid ${theme.palette.divider}`,
-                }}
-              >
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    endIcon={<ArrowForwardIcon />}
-                    onClick={scrollToCta}
-                  >
-                    Get a free site review
-                  </Button>
-                  <Button
-                    variant="text"
-                    size="large"
-                    onClick={() => {
-                      const el = document.getElementById("pricing");
-                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            <Grid
+              container
+              spacing={{ xs: 2, md: 3 }}
+              sx={{ mt: 1 }}
+              className="reveal"
+              style={{ "--delay": "140ms" } as any}
+            >
+              {heroOptions.map((option) => (
+                <Grid key={option.title} size={{ xs: 12, md: 4 }}>
+                  <Paper
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${option.title} - ${option.caption}`}
+                    onClick={() => scrollToId(option.targetId)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        scrollToId(option.targetId);
+                      }
                     }}
                     sx={{
-                      color: "text.secondary",
-                      opacity: showPricing ? 1 : 0,
-                      transform: showPricing ? "translateY(0)" : "translateY(8px)",
-                      transition: "opacity 0.5s ease, transform 0.5s ease",
-                      ml: { sm: "auto" },
+                      borderRadius: "var(--radius-card)",
+                      p: { xs: 2.5, md: 3 },
+                      height: "100%",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? "rgba(17, 22, 31, 0.75)"
+                          : "rgba(255, 255, 255, 0.9)",
+                      cursor: "pointer",
+                      display: "grid",
+                      gap: 1,
+                      alignContent: "space-between",
+                      minHeight: { xs: 0, md: 180 },
+                      boxShadow: "var(--shadow-soft)",
+                      transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+                      "@media (hover: hover) and (pointer: fine)": {
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "var(--shadow-strong)",
+                          borderColor: "primary.main",
+                        },
+                      },
                     }}
                   >
-                    See pricing
-                  </Button>
-                </Stack>
-              </Box>
-
-              <Paper
-                variant="outlined"
-                className="reveal"
-                style={{ "--delay": "360ms" } as any}
-                sx={{
-                  mt: 2,
-                  p: 2,
-                  borderRadius: "var(--radius-pill)",
-                  display: "flex",
-                  gap: 2,
-                  alignItems: "center",
-                  width: "fit-content",
-                  boxShadow: "var(--shadow-soft)",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                  "@media (hover: hover) and (pointer: fine)": {
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: "var(--shadow-strong)",
-                    },
-                  },
-                }}
-              >
-                <Image
-                  src={theme.palette.mode === "light" ? "/assets/MILogo_dark.png" : "/assets/MILogo.png"}
-                  alt="MI Website Rebuilds logo"
-                  width={28}
-                  height={28}
-                  sizes="28px"
-                  priority
-                />
-                <Typography color="text.secondary">
-                  Built with Next.js and Tailwind best practices, optimized for one action: contact you.
-                </Typography>
-              </Paper>
-            </Stack>
-          </Grid>
-          <Grid
-            size={{ xs: 12, md: 5 }}
-            sx={{
-              position: { md: "sticky" },
-              top: { md: 104 },
-              alignSelf: "flex-start",
-            }}
-          >
-            <Stack
-              spacing={2}
-              className="reveal"
-              style={{ "--delay": "200ms" } as any}
-              sx={{ maxWidth: 520, ml: { md: "auto" } }}
-            >
-              <Paper
-                variant="outlined"
-                sx={{
-                  ...primarySurface(theme.palette.mode),
-                  p: cardPad,
-                  borderRadius: "var(--radius-card)",
-                  transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                  "@media (hover: hover) and (pointer: fine)": {
-                    "&:hover": {
-                      transform: "translateY(-6px)",
-                      boxShadow: "var(--shadow-strong)",
-                    },
-                  },
-                  width: "100%",
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      theme.palette.mode === "dark"
-                        ? "radial-gradient(circle at top right, rgba(93, 169, 255, 0.2), transparent 55%)"
-                        : "radial-gradient(circle at top right, rgba(11, 61, 145, 0.18), transparent 55%)",
-                    opacity: 0.7,
-                    pointerEvents: "none",
-                  },
-                }}
-              >
-                <Stack spacing={2} sx={{ position: "relative", zIndex: 1 }}>
-                  <Typography variant="overline" color="text.secondary">
-                    Rebuild process
-                  </Typography>
-                  <Box sx={{ display: "grid", gap: 1.5 }}>
-                    {previewSteps.map((step, index) => {
-                      const isActive = activeStep === index;
-                      return (
-                        <Box
-                          key={step.label}
-                          sx={{
-                            borderRadius: "var(--radius-panel)",
-                            p: 1.5,
-                            border: "1px solid",
-                            borderColor: isActive ? "primary.main" : "divider",
-                            backgroundColor: isActive
-                              ? theme.palette.mode === "dark"
-                                ? "rgba(93, 169, 255, 0.12)"
-                                : "rgba(11, 61, 145, 0.08)"
-                              : "transparent",
-                            transition: "border 0.3s ease, background-color 0.3s ease",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: "grid",
-                              gridTemplateColumns: "auto 1fr",
-                              columnGap: 1.5,
-                              rowGap: 0.25,
-                              alignItems: "center",
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: "50%",
-                                bgcolor: isActive ? "primary.main" : "divider",
-                              }}
-                            />
-                            <Typography
-                              variant="subtitle2"
-                              color={isActive ? "text.primary" : "text.secondary"}
-                              sx={{ fontWeight: 700 }}
-                            >
-                              {step.label}
-                            </Typography>
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ gridColumn: "2 / 3" }}
-                            >
-                              {step.detail}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Stack>
-              </Paper>
-              <Paper
-                variant="outlined"
-                sx={{
-                  ...mutedSurface(theme.palette.mode),
-                  p: cardPad,
-                  borderRadius: "var(--radius-card)",
-                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
-                  width: "100%",
-                  "@media (hover: hover) and (pointer: fine)": {
-                    "&:hover": {
-                      transform: "translateY(-3px)",
-                      boxShadow: "var(--shadow-strong)",
-                    },
-                  },
-                }}
-              >
-                <Stack spacing={1.5}>
-                  <Typography variant="overline" color="text.secondary">
-                    Rebuild focus
-                  </Typography>
-                  <Stack spacing={1}>
-                    {[
-                      "Clearer contact path",
-                      "Mobile-first layout",
-                      "Faster load target (90+ Lighthouse)",
-                    ].map((item) => (
-                      <Stack key={item} direction="row" spacing={1.5} alignItems="center">
-                        <Box
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: "50%",
-                            bgcolor: "primary.main",
-                          }}
-                        />
-                        <Typography color="text.secondary">{item}</Typography>
-                      </Stack>
-                    ))}
-                  </Stack>
-                </Stack>
-              </Paper>
-            </Stack>
-          </Grid>
-        </Grid>
+                    <Stack spacing={1}>
+                      <Typography variant="h5" fontWeight={800} sx={{ lineHeight: 1.2 }}>
+                        {option.title}
+                      </Typography>
+                      <Typography color="text.secondary">{option.caption}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                      <Typography variant="body2" color="primary" sx={{ fontWeight: 700 }}>
+                        {option.cta}
+                      </Typography>
+                      <ArrowForwardIcon fontSize="small" color="primary" />
+                    </Stack>
+                  </Paper>
+                </Grid>
+              ))}
+            </Grid>
+          </Stack>
+        </Box>
       </Container>
     </Box>
   );

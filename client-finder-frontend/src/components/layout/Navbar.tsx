@@ -30,11 +30,10 @@ function scrollToId(id) {
 }
 
 const navLinks = [
-  { id: "offer", label: "Offer" },
-  { id: "pricing", label: "Pricing" },
   { id: "process", label: "Process" },
+  { id: "recent-rebuild", label: "Recent Rebuild" },
 ];
-const navPillWidth = 140;
+const navPillWidth = 160;
 
 export default function Navbar() {
   const theme = useTheme();
@@ -84,7 +83,7 @@ export default function Navbar() {
     >
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ py: 1 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ flex: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Image
                 src={mode === "light" ? "/assets/MILogo_dark.png" : "/assets/MILogo.png"}
@@ -105,7 +104,12 @@ export default function Navbar() {
           </Stack>
 
           {!isMobile && (
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mr: 1 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              alignItems="center"
+              sx={{ ml: { md: 2 }, flex: 1, justifyContent: "flex-end" }}
+            >
               {navLinks.map((link) => (
                 <Button
                   key={link.id}
@@ -113,21 +117,30 @@ export default function Navbar() {
                   onClick={() => scrollToId(link.id)}
                   sx={{
                     borderBottom: "2px solid",
-                    borderColor:
-                      activeSection === link.id ? "primary.main" : "transparent",
-                    color:
-                      activeSection === link.id
-                        ? "primary.main"
-                        : "text.primary",
-                    borderRadius: "var(--radius-pill)",
-                    width: navPillWidth,
-                    minWidth: navPillWidth,
-                    justifyContent: "center",
-                  }}
+                borderColor:
+                  activeSection === link.id ? "primary.main" : "transparent",
+                color:
+                  activeSection === link.id
+                    ? "primary.main"
+                    : "text.primary",
+                borderRadius: "var(--radius-pill)",
+                width: navPillWidth,
+                minWidth: navPillWidth,
+                justifyContent: "center",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                py: 0.9,
+                px: 1.25,
+              }}
                 >
                   {link.label}
                 </Button>
               ))}
+            </Stack>
+          )}
+
+          <Stack direction="row" spacing={1} alignItems="center">
+            {!isMobile && (
               <Button
                 variant="contained"
                 onClick={() => scrollToId("cta")}
@@ -135,14 +148,13 @@ export default function Navbar() {
                   width: navPillWidth,
                   minWidth: navPillWidth,
                   justifyContent: "center",
+                  fontSize: "0.9rem",
+                  fontWeight: 700,
                 }}
               >
-                Free Review
+                Request a Review
               </Button>
-            </Stack>
-          )}
-
-          <Stack direction="row" spacing={1} alignItems="center">
+            )}
             {isMobile && (
               <IconButton
                 aria-label="Open menu"

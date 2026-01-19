@@ -5,7 +5,12 @@ import { env } from "../config/env.js";
 import { openai } from "../services/openai.js";
 import { embedText } from "../services/embeddings.js";
 import { buildContext, retrieveKb } from "../services/rag.js";
-import { appendMessage, getOrCreateSession, getRecentMessages } from "../services/sessions.js";
+import {
+  appendMessage,
+  getOrCreateSession,
+  getRecentMessages,
+  upsertChatSession,
+} from "../services/sessions.js";
 import { extractFieldsFromText } from "../services/leadScoring.js";
 import { buildFactsContext, getAssistantFacts } from "../services/assistantFacts.js";
 import { getCachedContext, setCachedContext } from "../services/contextCache.js";
@@ -22,7 +27,7 @@ const MAX_CHAT_TOKENS = 260;
 
 const FAQ_CHEAT_SHEET = [
   "7-day timeline: day 1 kickoff, days 2-4 design + copy, days 5-6 build + QA, day 7 launch with analytics + SEO.",
-  "What’s included: refreshed design, conversion-focused copy, mobile/responsive polish, speed/SEO tuning, analytics + lead tracking, and launch support.",
+  "What's included: refreshed design, conversion-focused copy, mobile/responsive polish, speed/SEO tuning, analytics + lead tracking, and launch support.",
   "Pricing: flat project rate (no retainer); scope includes design, copy, build, speed/SEO, analytics, launch support.",
   "Getting started: share business name, website URL, and best email; we review, confirm scope, and lock your 7-day slot.",
   "Tech stack: do not mention; focus on benefits and outcomes.",
@@ -35,7 +40,7 @@ const faqFallbacks: { test: RegExp; reply: string }[] = [
   },
   {
     test: /pricing|cost|charge/i,
-    reply: "Flat project rate with no retainers. You get design, copy, build, speed/SEO tuning, analytics, and launch support. Share your site and goals and I’ll confirm scope.",
+    reply: "Flat project rate with no retainers. You get design, copy, build, speed/SEO tuning, analytics, and launch support. Share your site and goals and I'll confirm scope.",
   },
   {
     test: /what'?s included|include|deliverable|scope/i,
@@ -43,9 +48,11 @@ const faqFallbacks: { test: RegExp; reply: string }[] = [
   },
   {
     test: /how do i start|get started|begin|next step/i,
-    reply: "Share your business name, website URL, and best email and I’ll review your site, confirm scope, and lock your 7-day slot.",
+    reply: "Share your business name, website URL, and best email and I'll review your site, confirm scope, and lock your 7-day slot.",
   },
 ];
+
+const GOALS = ["more calls", "more leads", "more sales"];
 
 function pickFaqFallback(message) {
   const hit = faqFallbacks.find(({ test }) => test.test(message));
@@ -73,16 +80,18 @@ function writeNdjson(res, payload) {
   res.write(`${JSON.stringify(payload)}\n`);
 }
 
-function replaceVagueReply(reply, message) {
+function replaceVagueReply(reply: string, message: string) {
   const trimmed = String(reply || "").trim();
-  const needsReplace = /more detail|share.*detail|elaborate/i.test(trimmed);
-  if (!needsReplace) return trimmed;
+  const tooVague =
+    trimmed.length < 25 ||
+    /share.*detail|elaborate|more detail|hard to say|it depends/i.test(trimmed);
+
+  if (!tooVague) return trimmed;
+
   const faq = pickFaqFallback(message);
   if (faq) return faq;
-  return (
-    trimmed ||
-    "Quick recap: we rebuild your site in 7 days with design, copy, speed/SEO tuning, analytics, and launch support. What’s your site URL so I can tailor the plan?"
-  );
+
+  return "I can help - what's your website URL and what's the #1 goal (more calls, more leads, or more sales)?";
 }
 
 chatRouter.post("/chat", async (req, res) => {
@@ -93,11 +102,21 @@ chatRouter.post("/chat", async (req, res) => {
 
   const sessionId = parsed.data.sessionId || randomUUID();
   const message = parsed.data.message.trim();
+  const messageLower = message.toLowerCase();
   const stream = Boolean(parsed.data.stream);
+  let sessionGoal: string | null = null;
 
   try {
     try {
-      await getOrCreateSession(sessionId);
+      const session = await getOrCreateSession(sessionId);
+
+      const detectedGoal = GOALS.find((g) => messageLower.includes(g)) || null;
+      const resolvedGoal = detectedGoal || session.goal || null;
+
+      if (detectedGoal && detectedGoal !== session.goal) {
+        await upsertChatSession(sessionId, { goal: detectedGoal });
+      }
+      sessionGoal = resolvedGoal;
     } catch (error) {
       console.error("[chat_sessions] query failed:", {
         message: error?.message,
@@ -136,20 +155,48 @@ chatRouter.post("/chat", async (req, res) => {
     const recent = await recentPromise;
 
     const system = [
-      "You are a brief website consultant.",
-      "Rules: reply under 80 words, answer the user's question directly with 1-2 concrete specifics from the site facts or knowledge base, then ask one qualifying question.",
-      "If the question is unclear, offer a best-effort concise answer plus one clarifying question instead of asking for more detail first.",
-      "Do not mention any tech stack or implementation details.",
+      "You are Relay, the on-site assistant for a website rebuild offer.",
+      "Be specific, helpful, and non-repetitive.",
+      "Rules:",
+      "- Answer the user's question FIRST.",
+      "- Use at least 1 concrete detail from Site facts OR Knowledge base context in every answer. If none are available, say you don't have that detail. Only use the FAQ quick answers when the question is about pricing, timeline, what's included, or how to start.",
+      "- Do NOT repeat the same CTA or sentence in back-to-back replies.",
+      "- Ask a question ONLY when it's needed to move forward (max 1).",
+      "- Keep it concise but complete (80-140 words).",
+      "- Never mention tech stack or implementation details.",
+      "- If the user's question is a rephrase of a previous question in this session, do NOT repeat the same answer. Instead, add NEW information or explain what affects the answer.",
+      "- Only ask for missing information. If the user's goal is already known, do NOT ask for it again.",
       `FAQ quick answers: ${FAQ_CHEAT_SHEET}`,
-      "Use the knowledge base context when relevant.",
-      'Single CTA: "free website review".',
-      "Goal: answer FAQ briefly then qualify for business name, website URL, and email.",
-    ].join(" ");
+    ].join("\n");
 
     const messages = [
       { role: "system", content: system },
-      ...(factsContext ? [{ role: "system", content: `Site facts:\n${factsContext}` }] : []),
-      ...(context ? [{ role: "system", content: `Knowledge base context:\n${context}` }] : []),
+      ...(sessionGoal
+        ? [
+            {
+              role: "system",
+              content: `Known user goal for this session: ${sessionGoal}. Do not ask for it again; focus on the website URL or other missing details.`,
+            },
+          ]
+        : []),
+      ...(factsContext
+        ? [
+            { role: "system", content: `Site facts:\n${factsContext}` },
+            {
+              role: "system",
+              content: "Use the Site facts above as the source of truth when it applies.",
+            },
+          ]
+        : []),
+      ...(context
+        ? [
+            { role: "system", content: `Knowledge base context:\n${context}` },
+            {
+              role: "system",
+              content: "Use the KB context above as the source of truth when it applies. Prefer it over generic advice.",
+            },
+          ]
+        : []),
       ...recent.map((m) => ({ role: m.role, content: m.content })),
     ];
 

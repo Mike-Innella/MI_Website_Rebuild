@@ -1,8 +1,8 @@
 import emailjs from "@emailjs/browser";
 
-// EmailJS template must reference: {{name}} {{businessName}} {{websiteUrl}} {{email}} {{message}}
+// EmailJS template must reference: {{name}} {{email}} {{websiteUrl}} {{businessType}} {{message}} {{timeline}}
 
-export async function sendLeadEmail({ name, businessName, websiteUrl, email, message }) {
+export async function sendLeadEmail({ name, email, websiteUrl, businessType, message, timeline }) {
   const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
   const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
@@ -11,7 +11,7 @@ export async function sendLeadEmail({ name, businessName, websiteUrl, email, mes
     throw new Error("EmailJS is not configured.");
   }
 
-  const required = { name, businessName, websiteUrl, email };
+  const required = { name, email, websiteUrl, businessType, timeline };
   const missing = Object.entries(required)
     .filter(([, value]) => typeof value !== "string" || value.trim().length === 0)
     .map(([key]) => key);
@@ -23,7 +23,7 @@ export async function sendLeadEmail({ name, businessName, websiteUrl, email, mes
   await emailjs.send(
     serviceId,
     templateId,
-    { name, businessName, websiteUrl, email, message },
+    { name, email, websiteUrl, businessType, message, timeline },
     publicKey
   );
 

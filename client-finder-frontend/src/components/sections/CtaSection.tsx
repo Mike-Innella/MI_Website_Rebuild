@@ -6,13 +6,11 @@ import {
   Button,
   Card,
   CardContent,
-  Divider,
+  MenuItem,
   Stack,
   TextField,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Grid from "@mui/material/Grid";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
@@ -23,63 +21,47 @@ import { primarySurface, secondarySurface } from "@/lib/uiStyles";
 
 const initialState = {
   name: "",
-  businessName: "",
-  websiteUrl: "",
   email: "",
-  message: "",
+  websiteUrl: "",
+  businessType: "",
   company: "",
+  message: "",
+  timeline: "",
 };
 
-const ctaCardPad = { xs: 2, md: 3 };
+const businessTypes = ["Local service", "Online service", "Ecommerce", "Creator/portfolio", "Other"];
+const timelines = ["Within 2 weeks", "Within 30 days", "1–2 months", "Not sure yet"];
 
 export default function CtaSection() {
   const theme = useTheme();
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [form, setForm] = useState(initialState);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const nameErrorId = "cta-name-error";
-  const businessErrorId = "cta-business-error";
-  const websiteErrorId = "cta-website-error";
-  const emailErrorId = "cta-email-error";
-  const messageHelperId = "cta-message-help";
-
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const trimmedName = form.name.trim();
-  const trimmedBusinessName = form.businessName.trim();
-  const trimmedWebsiteUrl = form.websiteUrl.trim();
   const trimmedEmail = form.email.trim();
+  const trimmedWebsiteUrl = form.websiteUrl.trim();
+  const trimmedBusinessType = form.businessType.trim();
+  const trimmedMessage = form.message.trim();
+  const trimmedTimeline = form.timeline.trim();
+
   const errors = {
     name: trimmedName ? "" : "Name is required.",
-    businessName: trimmedBusinessName ? "" : "Business name is required.",
+    email: trimmedEmail.length ? (emailPattern.test(trimmedEmail) ? "" : "Enter a valid email.") : "Email is required.",
     websiteUrl: trimmedWebsiteUrl ? "" : "Website URL is required.",
-    email: trimmedEmail.length
-      ? emailPattern.test(trimmedEmail)
-        ? ""
-        : "Enter a valid email."
-      : "Email is required.",
+    businessType: trimmedBusinessType ? "" : "Business type is required.",
+    timeline: trimmedTimeline ? "" : "Timeline is required.",
   };
-
-  const infoIconSx = {
-    fontSize: 18,
-    color: "primary.main",
-    flexShrink: 0,
-  };
-
-  const nameError = hasSubmitted && Boolean(errors.name);
-  const businessError = hasSubmitted && Boolean(errors.businessName);
-  const websiteError = hasSubmitted && Boolean(errors.websiteUrl);
-  const emailError = hasSubmitted && Boolean(errors.email);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const normalizeUrl = (value) => {
+  const normalizeUrl = (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return "";
     if (/^https?:\/\//i.test(trimmed)) return trimmed;
@@ -88,13 +70,12 @@ export default function CtaSection() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (isLoading) {
-      return;
-    }
+    if (isLoading) return;
+
     setHasSubmitted(true);
-    setIsLoading(true);
     setErrorMessage("");
     setIsSuccess(false);
+    setIsLoading(true);
 
     if (form.company) {
       setIsLoading(false);
@@ -111,10 +92,11 @@ export default function CtaSection() {
       const normalizedUrl = normalizeUrl(form.websiteUrl);
       await sendLeadEmail({
         name: trimmedName,
-        businessName: trimmedBusinessName,
-        websiteUrl: normalizedUrl,
         email: trimmedEmail,
-        message: form.message.trim() || "No message provided.",
+        websiteUrl: normalizedUrl,
+        businessType: trimmedBusinessType,
+        message: trimmedMessage || "No additional notes provided.",
+        timeline: trimmedTimeline,
       });
 
       setIsSuccess(true);
@@ -127,60 +109,25 @@ export default function CtaSection() {
     }
   };
 
-  const handleReset = () => {
-    setForm(initialState);
-    setIsSuccess(false);
-    setHasSubmitted(false);
-    setErrorMessage("");
-  };
-
   return (
     <Section
       id="cta"
-      eyebrow="FREE REVIEW"
-      title="Send your website - I'll tell you if it's costing you customers."
-      subtitle={
-        <Box component="span">
-          <Box component="span" sx={{ display: "block", color: "text.primary", opacity: 0.82 }}>
-            Share your site and I&apos;ll call out the biggest friction points to fix first.
-          </Box>
-          <Box
-            component="span"
-            sx={{
-              display: "block",
-              mt: 0.6,
-              fontSize: { xs: "0.85rem", md: "0.95rem" },
-              color: "text.secondary",
-            }}
-          >
-            No pressure. I&apos;ll reply with a short, honest action plan.
-          </Box>
-        </Box>
-      }
+      eyebrow="Contact"
+      title="Get a Free Website Review"
+      subtitle="I’ll record a short Loom video reviewing your site and showing what’s holding it back."
       variant="paper"
       disableSpine
       sx={{
+        py: sectionPaddingCta,
         background:
           theme.palette.mode === "dark"
             ? "linear-gradient(180deg, rgba(93, 169, 255, 0.08), rgba(17, 22, 31, 0.95))"
             : "linear-gradient(180deg, rgba(11, 61, 145, 0.06), rgba(255, 255, 255, 0.95))",
-        py: sectionPaddingCta,
-        "& .MuiTypography-overline": {
-          letterSpacing: "0.24em",
-          opacity: 0.85,
-          color: "text.primary",
-        },
-        "& .MuiTypography-h3": {
-          fontSize: { xs: "clamp(1.85rem, 4.8vw, 2.3rem)", md: "clamp(2.4rem, 2.7vw, 2.9rem)" },
-        },
-        "& .ui-spine > .MuiStack-root": {
-          gap: { xs: 1, md: 1.2 },
-        },
       }}
     >
       <Grid
         container
-        spacing={{ xs: 2, md: 3 }}
+        spacing={{ xs: 3, md: 4 }}
         alignItems="stretch"
         sx={{ maxWidth: maxHeroWidth, mx: "auto" }}
       >
@@ -192,258 +139,232 @@ export default function CtaSection() {
               borderRadius: "var(--radius-card)",
               ...primarySurface(theme.palette.mode),
               transition: "border 0.2s ease, box-shadow 0.2s ease",
-              "&:focus-within": {
-                borderColor: "primary.main",
-                boxShadow: "0 24px 60px rgba(11, 61, 145, 0.2)",
-              },
               width: "100%",
               height: "100%",
               display: "flex",
               flexDirection: "column",
             }}
           >
-            <CardContent
-              sx={{ p: ctaCardPad, height: "100%", display: "flex", flexDirection: "column" }}
-            >
-              <Stack spacing={3} sx={{ flex: 1 }}>
-                {isSuccess ? (
-                  <Stack spacing={1.5} sx={{ flex: 1, justifyContent: "center" }}>
-                    <Typography variant="h6">Got it - I&apos;ll take a look.</Typography>
-                    <Typography color="text.secondary">
-                      I&apos;ll reply with the biggest friction points and quick wins.
-                    </Typography>
-                    <Button
-                      variant="text"
-                      size="small"
-                      onClick={handleReset}
-                      sx={{ width: "fit-content", px: 1, py: 0.5 }}
-                    >
-                      Send another
-                    </Button>
-                  </Stack>
-                ) : (
-                  <Box component="form" onSubmit={handleSubmit} sx={{ position: "relative" }}>
-                    <Stack spacing={2}>
-                      <Stack spacing={1}>
-                        <Typography variant="h5">Get a free site review</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          A few details help me tailor the feedback to your goals.
-                        </Typography>
-                      </Stack>
-                      <TextField
-                        id="cta-name"
-                        label="Name"
-                        name="name"
-                        value={form.name}
-                        onChange={handleChange}
-                        required
-                        disabled={isLoading}
-                        error={nameError}
-                        helperText={nameError ? errors.name : ""}
-                        FormHelperTextProps={nameError ? { id: nameErrorId } : undefined}
-                        inputProps={{
-                          "aria-describedby": nameError ? nameErrorId : undefined,
-                          "aria-invalid": nameError ? "true" : undefined,
-                        }}
-                        fullWidth
-                      />
-                      <TextField
-                        id="cta-business"
-                        label="Business name"
-                        name="businessName"
-                        value={form.businessName}
-                        onChange={handleChange}
-                        required
-                        disabled={isLoading}
-                        error={businessError}
-                        helperText={businessError ? errors.businessName : ""}
-                        FormHelperTextProps={businessError ? { id: businessErrorId } : undefined}
-                        inputProps={{
-                          "aria-describedby": businessError ? businessErrorId : undefined,
-                          "aria-invalid": businessError ? "true" : undefined,
-                        }}
-                        fullWidth
-                      />
-                      <TextField
-                        id="cta-website"
-                        label="Website URL"
-                        name="websiteUrl"
-                        value={form.websiteUrl}
-                        onChange={handleChange}
-                        required
-                        disabled={isLoading}
-                        error={websiteError}
-                        helperText={websiteError ? errors.websiteUrl : ""}
-                        FormHelperTextProps={websiteError ? { id: websiteErrorId } : undefined}
-                        inputProps={{
-                          inputMode: "url",
-                          autoComplete: "url",
-                          "aria-describedby": websiteError ? websiteErrorId : undefined,
-                          "aria-invalid": websiteError ? "true" : undefined,
-                        }}
-                        fullWidth
-                      />
-                      <TextField
-                        id="cta-email"
-                        label="Email"
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        required
-                        disabled={isLoading}
-                        error={emailError}
-                        helperText={emailError ? errors.email : ""}
-                        FormHelperTextProps={emailError ? { id: emailErrorId } : undefined}
-                        inputProps={{
-                          "aria-describedby": emailError ? emailErrorId : undefined,
-                          "aria-invalid": emailError ? "true" : undefined,
-                        }}
-                        fullWidth
-                      />
-                      <TextField
-                        id="cta-message"
-                        label="Message (optional)"
-                        name="message"
-                        value={form.message}
-                        onChange={handleChange}
-                        disabled={isLoading}
-                        placeholder="What are you hoping to improve? (e.g., more calls, faster load, better mobile layout)"
-                        multiline
-                        rows={isMdUp ? 5 : 4}
-                        helperText="Optional - but helps me give you a better action plan."
-                        FormHelperTextProps={{ id: messageHelperId }}
-                        inputProps={{
-                          maxLength: 1000,
-                          "aria-describedby": messageHelperId,
-                        }}
-                        fullWidth
-                      />
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          left: "-10000px",
-                          top: "auto",
-                          width: 1,
-                          height: 1,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <TextField
-                          label="Company"
-                          name="company"
-                          value={form.company}
-                          onChange={handleChange}
-                          tabIndex={-1}
-                          autoComplete="off"
-                        />
-                      </Box>
-                      {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
-                      <Box>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          size="large"
-                          disabled={isLoading}
-                          sx={{
-                            minHeight: 54,
-                            px: 4,
-                            transition:
-                              "transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease",
-                            "&:hover": {
-                              backgroundColor: theme.palette.primary.dark,
-                            },
-                            "&:active": {
-                              transform: "scale(0.98)",
-                            },
-                          }}
-                        >
-                          {isLoading ? "Sending..." : "Get my free site review"}
-                        </Button>
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-                          No obligation. I&apos;ll tell you if a rebuild is not needed.
-                        </Typography>
-                      </Box>
+            <CardContent sx={{ p: { xs: 2.5, md: 3 }, height: "100%", display: "flex", flexDirection: "column" }}>
+              {isSuccess ? (
+                <Stack spacing={1.5} sx={{ flex: 1, justifyContent: "center" }}>
+                  <Typography variant="h6">Thanks — review on the way.</Typography>
+                  <Typography color="text.secondary">
+                    I’ll send a short recording that calls out the biggest fixes to make.
+                  </Typography>
+                  <Button
+                    variant="text"
+                    size="small"
+                    onClick={() => {
+                      setForm(initialState);
+                      setIsSuccess(false);
+                      setHasSubmitted(false);
+                      setErrorMessage("");
+                    }}
+                    sx={{ width: "fit-content", px: 1, py: 0.5 }}
+                  >
+                    Send another
+                  </Button>
+                </Stack>
+              ) : (
+                <Box component="form" onSubmit={handleSubmit}>
+                  <Stack spacing={2.25}>
+                    <Stack spacing={0.5}>
+                      <Typography variant="h5">Required fields only</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        A quick form so I can tailor the recording to your business.
+                      </Typography>
                     </Stack>
-                  </Box>
-                )}
-              </Stack>
+                    <TextField
+                      id="cta-name"
+                      label="Name"
+                      name="name"
+                      value={form.name}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      error={hasSubmitted && Boolean(errors.name)}
+                      helperText={hasSubmitted && errors.name ? errors.name : ""}
+                      fullWidth
+                    />
+                    <TextField
+                      id="cta-email"
+                      label="Email"
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      error={hasSubmitted && Boolean(errors.email)}
+                      helperText={hasSubmitted && errors.email ? errors.email : ""}
+                      fullWidth
+                    />
+                    <TextField
+                      id="cta-website"
+                      label="Website URL"
+                      name="websiteUrl"
+                      value={form.websiteUrl}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      error={hasSubmitted && Boolean(errors.websiteUrl)}
+                      helperText={hasSubmitted && errors.websiteUrl ? errors.websiteUrl : ""}
+                      fullWidth
+                    />
+                    <TextField
+                      id="cta-business-type"
+                      select
+                      label="Business type"
+                      name="businessType"
+                      value={form.businessType}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      error={hasSubmitted && Boolean(errors.businessType)}
+                      helperText={hasSubmitted && errors.businessType ? errors.businessType : ""}
+                      fullWidth
+                      >
+                      {businessTypes.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      id="cta-timeline"
+                      select
+                      label="When do you want changes live?"
+                      name="timeline"
+                      value={form.timeline}
+                      onChange={handleChange}
+                      required
+                      disabled={isLoading}
+                      error={hasSubmitted && Boolean(errors.timeline)}
+                      helperText={hasSubmitted && errors.timeline ? errors.timeline : ""}
+                      fullWidth
+                    >
+                      {timelines.map((time) => (
+                        <MenuItem key={time} value={time}>
+                          {time}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <TextField
+                      id="cta-message"
+                      label="Anything specific you want me to look at? (optional)"
+                      name="message"
+                      value={form.message}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                      placeholder='e.g., "Not getting calls", "Unsure what to change first", "Old site needs a refresh"'
+                      multiline
+                      rows={4}
+                      helperText="This helps me tailor the review — not required."
+                      fullWidth
+                    />
+
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        left: "-10000px",
+                        top: "auto",
+                        width: 1,
+                        height: 1,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <TextField
+                        label="Company"
+                        name="company"
+                        value={form.company}
+                        onChange={handleChange}
+                        tabIndex={-1}
+                        autoComplete="off"
+                      />
+                    </Box>
+                    {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      size="large"
+                      disabled={isLoading}
+                      sx={{ minHeight: 54 }}
+                    >
+                      {isLoading ? "Sending..." : "Request a Review (Recorded)"}
+                    </Button>
+                    <Typography variant="body2" color="text.secondary">
+                      I’ll reply within 24–48 hours with a Loom recording.
+                    </Typography>
+                  </Stack>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Stack spacing={2.5} className="reveal" style={{ "--delay": "140ms" } as any}>
-            <Card
+          <Card
+            className="reveal"
+            style={{ "--delay": "140ms" } as any}
+            sx={{
+              borderRadius: "var(--radius-card)",
+              ...secondarySurface,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <CardContent
               sx={{
-                borderRadius: "var(--radius-card)",
-                ...secondarySurface,
-                height: "100%",
+                p: { xs: 2.5, md: 3.5 },
                 display: "flex",
                 flexDirection: "column",
+                gap: 2.5,
+                height: "100%",
               }}
             >
-              <CardContent
-                sx={{ p: ctaCardPad, height: "100%", display: "flex", flexDirection: "column" }}
+              <Box sx={{ color: "text.secondary" }}>
+                <Typography>
+                  I’ll record a short Loom pointing out what’s blocking inquiries and where quick wins are hiding.
+                </Typography>
+              </Box>
+              <Box sx={{ display: "grid", gap: 2 }}>
+                <Box>
+                  <Typography variant="h6">What you’ll receive</Typography>
+                  <Stack spacing={1.25} color="text.secondary" sx={{ mt: 1.25 }}>
+                    <Typography>• A recorded walkthrough of your current site</Typography>
+                    <Typography>• The biggest blockers to getting more inquiries</Typography>
+                    <Typography>• The fastest fixes to test first</Typography>
+                    <Typography>• A short plan on what to improve first</Typography>
+                  </Stack>
+                </Box>
+                <Box>
+                  <Typography variant="h6">What I’ll check</Typography>
+                  <Stack spacing={1.25} color="text.secondary" sx={{ mt: 1.25 }}>
+                    <Typography>• Clarity of your offer and next step</Typography>
+                    <Typography>• How easy it is to contact you on mobile</Typography>
+                    <Typography>• Whether pages make people trust you quickly</Typography>
+                    <Typography>• Speed, layout, and obvious call-to-action</Typography>
+                  </Stack>
+                </Box>
+              </Box>
+              <Box
+                sx={{
+                  mt: "auto",
+                  p: 2,
+                  borderRadius: "var(--radius-panel)",
+                  backgroundColor:
+                    theme.palette.mode === "dark" ? "rgba(93, 169, 255, 0.08)" : "rgba(11, 61, 145, 0.06)",
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
               >
-                <Stack spacing={2} sx={{ flex: 1 }}>
-                  <Stack spacing={1.6}>
-                    <Typography variant="h6">What happens next</Typography>
-                    <Stack
-                      component="ul"
-                      spacing={4}
-                      sx={{ m: 0, p: 0, listStyle: "none", color: "text.secondary" }}
-                    >
-                      {[
-                        "I review your site and note the biggest friction points.",
-                        "You get a short list of fixes and priorities.",
-                        "We decide if the 7-day rebuild is a fit.",
-                      ].map((item) => (
-                        <Stack
-                          key={item}
-                          component="li"
-                          direction="row"
-                          spacing={1.5}
-                          alignItems="center"
-                        >
-                          <CheckCircleOutlineIcon sx={infoIconSx} />
-                          <Typography color="text.secondary">{item}</Typography>
-                        </Stack>
-                      ))}
-                    </Stack>
-                    <Typography variant="body2" color="text.secondary">
-                      Typical reply: within 24-48 hours.
-                    </Typography>
-                  </Stack>
-                  <Divider sx={{ my: 2, opacity: 0.6 }} />
-                  <Stack spacing={1.6}>
-                    <Typography variant="h6">What I check</Typography>
-                    <Stack
-                      component="ul"
-                      spacing={4}
-                      sx={{ m: 0, p: 0, listStyle: "none", color: "text.secondary" }}
-                    >
-                      {[
-                        "Mobile layout and speed targets",
-                        "Clear contact path and CTA",
-                        "Messaging and layout hierarchy",
-                      ].map((item) => (
-                        <Stack
-                          key={item}
-                          component="li"
-                          direction="row"
-                          spacing={1.5}
-                          alignItems="center"
-                        >
-                          <CheckCircleOutlineIcon sx={infoIconSx} />
-                          <Typography color="text.secondary">{item}</Typography>
-                        </Stack>
-                      ))}
-                    </Stack>
-                  </Stack>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Stack>
+                <Typography color="text.secondary">
+                  If the fit isn’t right, I’ll tell you — no obligation to move forward.
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
     </Section>

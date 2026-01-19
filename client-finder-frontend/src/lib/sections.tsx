@@ -11,14 +11,10 @@ const createSection = (loader, cardCount, key) => {
 };
 
 export const homeSections = [
-  createSection(
-    () => import("@/components/sections/ProblemSolutionSection"),
-    2,
-    "problem-solution",
-  ),
-  createSection(() => import("@/components/sections/ProofSection"), 2, "proof"),
-  createSection(() => import("@/components/sections/OfferSection"), 3, "offer"),
-  createSection(() => import("@/components/sections/PricingSection"), 3, "pricing"),
-  createSection(() => import("@/components/sections/ProcessSection"), 3, "process"),
-  createSection(() => import("@/components/sections/CtaSection"), 1, "cta"),
+  createSection(() => import("@/components/sections/ProblemSolutionSection"), 1, "offer-single"),
+  createSection(() => import("@/components/sections/OfferSection"), 2, "offer-business"),
+  createSection(() => import("@/components/sections/ProofSection"), 1, "recent-rebuild"),
+  createSection(() => import("@/components/sections/ProcessSection"), 2, "process"),
+  createSection(() => import("@/components/sections/CtaSection"), 1, "lead-magnet"),
+  createSection(() => import("@/components/sections/FinalCtaSection"), 1, "final-cta"),
 ];
