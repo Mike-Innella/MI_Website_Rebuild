@@ -114,7 +114,7 @@ chatRouter.post("/chat", async (req, res) => {
     const completionArgs = {
       model: env.OPENAI_MODEL,
       messages,
-      max_tokens: MAX_CHAT_TOKENS,
+      max_completion_tokens: MAX_CHAT_TOKENS,
       temperature: CHAT_TEMPERATURE,
     };
 
