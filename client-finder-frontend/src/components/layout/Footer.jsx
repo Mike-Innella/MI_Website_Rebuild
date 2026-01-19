@@ -1,0 +1,210 @@
+"use client";
+
+import Image from "next/image";
+import {
+  Box,
+  Button,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Stack,
+  Typography,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { useState } from "react";
+
+export default function Footer() {
+  const theme = useTheme();
+  const year = new Date().getFullYear();
+  const [activeModal, setActiveModal] = useState(null);
+
+  const footerLinks = [
+    {
+      id: "included",
+      label: "What's included?",
+      title: "What's included",
+      body: (
+        <>
+          I focus on fast, conversion-ready rebuilds: clearer messaging, a sharper CTA
+          path, mobile polish, and performance improvements so visitors take action.
+        </>
+      ),
+    },
+    {
+      id: "privacy",
+      label: "Privacy?",
+      title: "Privacy",
+      body: (
+        <>
+          Your details are only used to send the review and follow-up. I never share or
+          sell contact information.
+        </>
+      ),
+    },
+    {
+      id: "speed",
+      label: "How fast?",
+      title: "How fast is the review?",
+      body: (
+        <>
+          Most reviews go out within 24-48 hours. If I need more context, I will ask a
+          quick follow-up.
+        </>
+      ),
+    },
+    {
+      id: "start",
+      label: "How do I start?",
+      title: "How do I start?",
+      body: (
+        <>
+          Send your site, and I will reply with the biggest friction points and quick
+          wins. If it looks like a fit, we can book a short kickoff.
+        </>
+      ),
+    },
+  ];
+
+  const scrollToCta = () => {
+    const el = document.getElementById("cta");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const activeContent = footerLinks.find((link) => link.id === activeModal);
+
+  return (
+    <Box
+      component="footer"
+      sx={{
+        borderTop: 1,
+        borderColor: "divider",
+        py: { xs: 5, md: 8 },
+        mt: { xs: 6, md: 8 },
+        backdropFilter: "blur(12px)",
+        background:
+          theme.palette.mode === "dark"
+            ? "linear-gradient(180deg, rgba(10, 15, 24, 0.9), rgba(10, 15, 24, 0.98))"
+            : "linear-gradient(180deg, rgba(245, 247, 251, 0.9), rgba(255, 255, 255, 0.98))",
+      }}
+    >
+      <Container>
+        <Stack spacing={{ xs: 4, md: 5 }}>
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={{ xs: 3, md: 6 }}
+            alignItems={{ xs: "flex-start", md: "center" }}
+            justifyContent="space-between"
+          >
+            <Stack spacing={1.5} sx={{ maxWidth: 420 }}>
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Image
+                  src={
+                    theme.palette.mode === "light"
+                      ? "/assets/MILogo_dark.png"
+                      : "/assets/MILogo.png"
+                  }
+                  alt="MI logo"
+                  width={46}
+                  height={46}
+                  sizes="46px"
+                  loading="lazy"
+                />
+                <Typography variant="subtitle1">M. I. Website Rebuilds</Typography>
+              </Stack>
+              <Typography variant="body2" color="text.secondary">
+                I rebuild outdated websites for small businesses so customers can actually
+                find and contact you.
+              </Typography>
+            </Stack>
+            <Box
+              sx={{
+                width: { xs: "100%", md: 460 },
+                borderRadius: "var(--radius-card)",
+                border: "1px solid",
+                borderColor: "divider",
+                px: { xs: 2.5, md: 3 },
+                py: { xs: 2.5, md: 3 },
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(20, 27, 39, 0.85)"
+                    : "rgba(255, 255, 255, 0.9)",
+                boxShadow: "var(--shadow-soft)",
+              }}
+            >
+              <Stack spacing={1.5}>
+                <Typography variant="h6">Get a free website review</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Send me your site and I&apos;ll tell you what to fix first.
+                </Typography>
+                <Button
+                  onClick={scrollToCta}
+                  variant="contained"
+                  sx={{
+                    alignSelf: "flex-start",
+                    mt: 0.5,
+                    backgroundColor: "primary.main",
+                    color: "primary.contrastText",
+                    "&:hover": {
+                      backgroundColor: "primary.dark",
+                    },
+                  }}
+                >
+                  Get a free website review
+                </Button>
+              </Stack>
+            </Box>
+          </Stack>
+          <Divider />
+          <Stack
+            direction={{ xs: "column", md: "row" }}
+            spacing={{ xs: 1.5, md: 3 }}
+            alignItems={{ xs: "flex-start", md: "center" }}
+            justifyContent="space-between"
+          >
+            <Typography variant="body2" color="text.secondary">
+              Copyright {year} M. I. Website Rebuilds
+            </Typography>
+            <Stack direction="row" spacing={2} flexWrap="wrap">
+              {footerLinks.map((link) => (
+                <Button
+                  key={link.id}
+                  variant="text"
+                  size="small"
+                  onClick={() => setActiveModal(link.id)}
+                  sx={{ px: 0.5 }}
+                >
+                  {link.label}
+                </Button>
+              ))}
+            </Stack>
+          </Stack>
+        </Stack>
+      </Container>
+      <Dialog
+        open={Boolean(activeModal)}
+        onClose={() => setActiveModal(null)}
+        aria-labelledby="footer-dialog-title"
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "var(--radius-card)",
+            border: "1px solid",
+            borderColor: "divider",
+          },
+        }}
+      >
+        <DialogTitle id="footer-dialog-title">{activeContent?.title}</DialogTitle>
+        <DialogContent>
+          <Typography color="text.secondary">{activeContent?.body}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setActiveModal(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}
