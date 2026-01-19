@@ -20,6 +20,14 @@ const ChatBody = z.object({
 
 const MAX_CHAT_TOKENS = 260;
 
+const FAQ_CHEAT_SHEET = [
+  "7-day timeline: day 1 kickoff, days 2-4 design + copy, days 5-6 build + QA, day 7 launch with analytics + SEO.",
+  "What’s included: refreshed design, conversion-focused copy, mobile/responsive polish, speed/SEO tuning, analytics + lead tracking, and launch support.",
+  "Pricing: flat project rate (no retainer); scope includes design, copy, build, speed/SEO, analytics, launch support.",
+  "Getting started: share business name, website URL, and best email; we review, confirm scope, and lock your 7-day slot.",
+  "Tech stack: do not mention; focus on benefits and outcomes.",
+].join(" | ");
+
 const faqFallbacks: { test: RegExp; reply: string }[] = [
   {
     test: /how fast|timeline|speed|turnaround/i,
@@ -132,6 +140,7 @@ chatRouter.post("/chat", async (req, res) => {
       "Rules: reply under 80 words, answer the user's question directly with 1-2 concrete specifics from the site facts or knowledge base, then ask one qualifying question.",
       "If the question is unclear, offer a best-effort concise answer plus one clarifying question instead of asking for more detail first.",
       "Do not mention any tech stack or implementation details.",
+      `FAQ quick answers: ${FAQ_CHEAT_SHEET}`,
       "Use the knowledge base context when relevant.",
       'Single CTA: "free website review".',
       "Goal: answer FAQ briefly then qualify for business name, website URL, and email.",
