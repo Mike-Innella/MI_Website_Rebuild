@@ -18,8 +18,8 @@ function pickSimilarity(r) {
  * Retrieves KB chunks via the ONLY supported RPC: public.match_kb_chunks
  * Expected RPC fields (per your DB): chunk_id, doc_id, chunk_index, title, chunk_text, chunk_title, tags, source, similarity
  */
-export async function retrieveKb(queryEmbedding, k = 3) {
-  const matchCount = Math.max(1, Math.min(20, Number(k) || 3));
+export async function retrieveKb(queryEmbedding, k = 6) {
+  const matchCount = Math.max(1, Math.min(20, Number(k) || 6));
   const minSimilarity = getMinSimilarity();
   const supabase = createServerSupabase();
 

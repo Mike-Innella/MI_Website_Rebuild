@@ -18,7 +18,7 @@ const ChatBody = z.object({
   stream: z.boolean().optional(),
 });
 
-const MAX_CHAT_TOKENS = 140;
+const MAX_CHAT_TOKENS = 220;
 
 const faqFallbacks: { test: RegExp; reply: string }[] = [
   {
@@ -57,7 +57,8 @@ function leadIntentFromFields(fields) {
 
 function shouldSkipRag(message) {
   const wordCount = message.split(/\s+/).filter(Boolean).length;
-  return wordCount < 2 && message.length < 10;
+  // Only skip for extremely tiny inputs; otherwise always retrieve KB for better answers.
+  return wordCount < 1 && message.length < 6;
 }
 
 function writeNdjson(res, payload) {
@@ -120,8 +121,8 @@ chatRouter.post("/chat", async (req, res) => {
 
     const system = [
       "You are a brief website consultant.",
-      "Rules: reply under 60 words, answer the user's question directly, then ask one qualifying question.",
-      "Do not ask for more detail unless the question is unclear.",
+      "Rules: reply under 70 words, answer the user's question directly with a concrete fact or timeline, then ask one qualifying question.",
+      "If the question is unclear, offer a best-effort concise answer plus one clarifying question instead of asking for more detail first.",
       "Do not mention any tech stack or implementation details.",
       "Use the knowledge base context when relevant.",
       'Single CTA: "free website review".',
