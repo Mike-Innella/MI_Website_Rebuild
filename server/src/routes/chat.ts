@@ -18,7 +18,7 @@ const ChatBody = z.object({
   stream: z.boolean().optional(),
 });
 
-const MAX_CHAT_TOKENS = 220;
+const MAX_CHAT_TOKENS = 260;
 
 const faqFallbacks: { test: RegExp; reply: string }[] = [
   {
@@ -57,12 +57,24 @@ function leadIntentFromFields(fields) {
 
 function shouldSkipRag(message) {
   const wordCount = message.split(/\s+/).filter(Boolean).length;
-  // Only skip for extremely tiny inputs; otherwise always retrieve KB for better answers.
-  return wordCount < 1 && message.length < 6;
+  // Only skip for empty inputs; otherwise always retrieve KB for better answers.
+  return wordCount === 0 && message.length === 0;
 }
 
 function writeNdjson(res, payload) {
   res.write(`${JSON.stringify(payload)}\n`);
+}
+
+function replaceVagueReply(reply, message) {
+  const trimmed = String(reply || "").trim();
+  const needsReplace = /more detail|share.*detail|elaborate/i.test(trimmed);
+  if (!needsReplace) return trimmed;
+  const faq = pickFaqFallback(message);
+  if (faq) return faq;
+  return (
+    trimmed ||
+    "Quick recap: we rebuild your site in 7 days with design, copy, speed/SEO tuning, analytics, and launch support. What’s your site URL so I can tailor the plan?"
+  );
 }
 
 chatRouter.post("/chat", async (req, res) => {
@@ -93,13 +105,9 @@ chatRouter.post("/chat", async (req, res) => {
     const recentPromise = getRecentMessages(sessionId, 8);
 
     let docs = [];
-    const cachedDocs = getCachedContext(sessionId);
-    if (shouldSkipRag(message) && cachedDocs) {
-      docs = cachedDocs;
-    } else if (!shouldSkipRag(message)) {
+    if (!shouldSkipRag(message)) {
       const queryEmbedding = await embedText(message);
-      docs = await retrieveKb(queryEmbedding, 3);
-      setCachedContext(sessionId, docs);
+      docs = await retrieveKb(queryEmbedding, 8);
     }
 
     const context = buildContext(docs);
@@ -121,7 +129,7 @@ chatRouter.post("/chat", async (req, res) => {
 
     const system = [
       "You are a brief website consultant.",
-      "Rules: reply under 70 words, answer the user's question directly with a concrete fact or timeline, then ask one qualifying question.",
+      "Rules: reply under 80 words, answer the user's question directly with 1-2 concrete specifics from the site facts or knowledge base, then ask one qualifying question.",
       "If the question is unclear, offer a best-effort concise answer plus one clarifying question instead of asking for more detail first.",
       "Do not mention any tech stack or implementation details.",
       "Use the knowledge base context when relevant.",
@@ -170,12 +178,13 @@ chatRouter.post("/chat", async (req, res) => {
 
         const faqFallback = pickFaqFallback(message);
         const finalReply = fullReply.trim() || faqFallback || "Could you share a bit more detail?";
+        const usableReply = replaceVagueReply(finalReply, message);
         if (!aborted) {
-          await appendMessage(sessionId, "assistant", finalReply);
+          await appendMessage(sessionId, "assistant", usableReply);
         }
 
         const extracted = extractFieldsFromText(
-          recent.map((m) => m.content).join("\n") + "\n" + message + "\n" + finalReply,
+          recent.map((m) => m.content).join("\n") + "\n" + message + "\n" + usableReply,
         );
         const suggestedFields = Object.fromEntries(
           Object.entries(extracted).filter(([, v]) => Boolean(v)),
@@ -186,7 +195,7 @@ chatRouter.post("/chat", async (req, res) => {
           writeNdjson(res, {
             type: "final",
             sessionId,
-            reply: finalReply,
+            reply: usableReply,
             suggestedFields,
             leadIntent,
             retrieved: docs.map((d) => ({ title: d.title, similarity: d.similarity })).slice(0, 3),
@@ -209,8 +218,9 @@ chatRouter.post("/chat", async (req, res) => {
 
     const faqFallback = pickFaqFallback(message);
 
-    const reply =
+    const rawReply =
       completion.choices?.[0]?.message?.content?.trim() || faqFallback || "Could you share a bit more detail?";
+    const reply = replaceVagueReply(rawReply, message);
     await appendMessage(sessionId, "assistant", reply);
 
     const extracted = extractFieldsFromText(
