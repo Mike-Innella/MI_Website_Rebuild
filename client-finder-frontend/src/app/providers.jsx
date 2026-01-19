@@ -29,16 +29,17 @@ const getSystemMode = () => {
 };
 
 export default function Providers({ children }) {
-  const [mode, setMode] = React.useState(
-    () => getStoredMode() ?? getSystemMode(),
-  );
+  const [mode, setMode] = React.useState("light");
   const userPreferenceRef = React.useRef(false);
 
   React.useEffect(() => {
     const saved = getStoredMode();
     if (saved) {
       userPreferenceRef.current = true;
+      setMode(saved);
+      return;
     }
+    setMode(getSystemMode());
   }, []);
 
   React.useEffect(() => {
