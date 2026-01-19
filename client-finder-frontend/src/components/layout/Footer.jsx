@@ -106,7 +106,7 @@ export default function Footer() {
                       ? "/assets/MILogo_dark.png"
                       : "/assets/MILogo.png"
                   }
-                  alt="MI logo"
+                  alt="MI Website Rebuilds logo"
                   width={46}
                   height={46}
                   sizes="46px"
@@ -115,8 +115,7 @@ export default function Footer() {
                 <Typography variant="subtitle1">M. I. Website Rebuilds</Typography>
               </Stack>
               <Typography variant="body2" color="text.secondary">
-                I rebuild outdated websites for small businesses so customers can actually
-                find and contact you.
+                Fast, modern websites that get more customers to reach out. 7-day rebuild — no tech headaches.
               </Typography>
             </Stack>
             <Box
@@ -135,7 +134,7 @@ export default function Footer() {
               }}
             >
               <Stack spacing={1.5}>
-                <Typography variant="h6">Get a free website review</Typography>
+                <Typography variant="h6">Get a free site review</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Send me your site and I&apos;ll tell you what to fix first.
                 </Typography>
@@ -152,7 +151,7 @@ export default function Footer() {
                     },
                   }}
                 >
-                  Get a free website review
+                  Get a free site review
                 </Button>
               </Stack>
             </Box>

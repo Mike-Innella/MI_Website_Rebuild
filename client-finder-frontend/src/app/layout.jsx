@@ -1,9 +1,15 @@
 import "./globals.css";
 import "../components/skeleton/skeleton.css";
+import { Inter } from "next/font/google";
 import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
 import RelayWidget from "@/components/relay/RelayWidget";
 import { siteConfig, siteUrl } from "@/lib/siteConfig";
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const metadata = {
   title: {
@@ -66,7 +72,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
         <Providers>
           {children}
           <Footer />

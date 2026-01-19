@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import ConstructionOutlinedIcon from "@mui/icons-material/ConstructionOutlined";
@@ -14,23 +14,23 @@ import { secondarySurface } from "@/lib/uiStyles";
 const steps = [
   {
     title: "Send your current website",
-    detail: "Share your URL and any notes about what is not working today.",
-    outcome: { label: "Audit", icon: FactCheckOutlinedIcon },
+    detail: "Share your URL and the biggest issues you see today.",
+    outcome: { label: "Send", icon: FactCheckOutlinedIcon },
   },
   {
-    title: "I rebuild and refine",
-    detail: "A focused 7-day sprint with clear updates and a review checkpoint.",
+    title: "I rebuild it in 7 days",
+    detail: "Copy, design, and speed tuned for more calls and inquiries.",
     outcome: { label: "Rebuild", icon: ConstructionOutlinedIcon },
   },
   {
-    title: "1 revision round",
-    detail: "One review pass to keep momentum before launch.",
-    outcome: { label: "Polish", icon: AutoFixHighOutlinedIcon },
+    title: "You approve changes",
+    detail: "One focused review round so nothing slows down.",
+    outcome: { label: "Approve", icon: AutoFixHighOutlinedIcon },
   },
   {
-    title: "Launch and support",
-    detail: "I handle hosting and small edits so you stay focused on customers.",
-    outcome: { label: "Live", icon: RocketLaunchOutlinedIcon },
+    title: "Site goes live + I handle hosting",
+    detail: "Launch, hosting, and small updates handled for you.",
+    outcome: { label: "Launch", icon: RocketLaunchOutlinedIcon },
   },
 ];
 
@@ -253,6 +253,18 @@ export default function ProcessSection() {
             );
           })}
         </Stack>
+        <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => {
+              const el = document.getElementById("cta");
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          >
+            Get a free site review
+          </Button>
+        </Box>
       </Box>
     </Section>
   );

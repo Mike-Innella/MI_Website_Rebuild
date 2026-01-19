@@ -136,7 +136,7 @@ export default function OfferSection() {
                       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                     }}
                   >
-                    Start with a free review
+                    Get a free site review
                   </Button>
                 </Box>
               </Stack>

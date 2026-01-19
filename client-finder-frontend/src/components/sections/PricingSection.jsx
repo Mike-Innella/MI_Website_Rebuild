@@ -27,7 +27,7 @@ const starterCard = {
   ],
   useCases: ["Portfolio refresh", "Creator landing page", "Personal brand"],
   pill: "Clear scope. Fast turnaround.",
-  cta: "Start my SPA",
+  cta: "Get a free site review",
 };
 
 const rebuildFeatures = [
@@ -86,6 +86,17 @@ export default function PricingSection() {
           borderColor: "divider",
         }}
       >
+        <Stack spacing={1} sx={{ mb: { xs: 3, md: 4 } }}>
+          <Typography variant="h5" fontWeight={800}>
+            $1,000 — Full website rebuild
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            $100/mo — Hosting + updates
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Transparent pricing so you can self-qualify before we talk.
+          </Typography>
+        </Stack>
         <Grid container spacing={sectionGap} alignItems="stretch">
           <Grid size={{ xs: 12, md: 4 }} sx={{ order: { xs: 2, md: 1 } }}>
             <Card
@@ -226,7 +237,7 @@ export default function PricingSection() {
                 <Stack spacing={2} sx={{ flex: 1 }}>
                   <Stack spacing={0.5}>
                     <Typography variant="h3" fontWeight={800}>
-                      $1,000 rebuild
+                      $1,000 — Full website rebuild
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={intentLabelSx}>
                       Best for growing businesses
@@ -311,7 +322,7 @@ export default function PricingSection() {
                     }}
                     sx={{ minHeight: 50, px: 4 }}
                   >
-                    Request a free review
+                    Get a free site review
                   </Button>
                 </Stack>
               </CardContent>
@@ -341,7 +352,7 @@ export default function PricingSection() {
               >
                 <Stack spacing={2.5} sx={{ flex: 1 }}>
                   <Stack spacing={0.5}>
-                    <Typography variant="h4">$100/month</Typography>
+                    <Typography variant="h4">$100/mo — Hosting + updates</Typography>
                     <Typography variant="body2" color="text.secondary" sx={intentLabelSx}>
                       For ongoing peace of mind
                     </Typography>
@@ -407,7 +418,7 @@ export default function PricingSection() {
                       },
                     }}
                   >
-                    Learn about care plan
+                    Get a free site review
                   </Button>
                 </Stack>
               </CardContent>
@@ -421,6 +432,18 @@ export default function PricingSection() {
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1, textAlign: "center" }}>
         Built for performance, clarity, and long-term maintainability.
       </Typography>
+      <Box sx={{ mt: 3, display: "flex", justifyContent: "center" }}>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => {
+            const el = document.getElementById("cta");
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          Get a free site review
+        </Button>
+      </Box>
     </Section>
   );
 }

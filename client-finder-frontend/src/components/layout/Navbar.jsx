@@ -31,8 +31,8 @@ function scrollToId(id) {
 
 const navLinks = [
   { id: "offer", label: "Offer" },
-  { id: "process", label: "Process" },
   { id: "pricing", label: "Pricing" },
+  { id: "process", label: "Process" },
 ];
 const navPillWidth = 140;
 
@@ -88,11 +88,11 @@ export default function Navbar() {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Image
                 src={mode === "light" ? "/assets/MILogo_dark.png" : "/assets/MILogo.png"}
-                alt="MI Logo"
+                alt="MI Website Rebuilds logo"
                 width={48}
                 height={48}
                 sizes="48px"
-                loading="lazy"
+                priority
               />
             </Box>
             <Typography

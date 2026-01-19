@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -10,17 +10,17 @@ import { maxHeroWidth, sectionGap } from "@/lib/layoutTokens";
 import { cardPad, secondarySurface } from "@/lib/uiStyles";
 
 const problems = [
-  { lead: "Breaks on phones", detail: "even if desktop looks fine." },
-  { lead: "No clear contact path", detail: "so leads bounce." },
-  { lead: "Slow load times", detail: "make the site feel outdated." },
-  { lead: "DIY fixes pile up", detail: "and the story stays muddy." },
+  { lead: "Customers bounce before calling", detail: "because the site feels slow or dated." },
+  { lead: "Mobile visitors give up", detail: "when tap-to-call or maps are buried." },
+  { lead: "Forms break or go unanswered", detail: "so real leads never reach you." },
+  { lead: "Your offer isn’t clear in 5 seconds", detail: "so people don’t know if you serve them." },
 ];
 
 const solution = [
-  { lead: "A focused rebuild", detail: "that makes it obvious who you are and how to reach you." },
-  { lead: "Performance-first pages", detail: "that load fast and feel modern." },
-  { lead: "Clear messaging", detail: "that guides visitors to one action." },
-  { lead: "Support handled for you", detail: "so momentum never slips." },
+  { lead: "Faster load times", detail: "so customers stay long enough to reach out." },
+  { lead: "Mobile-friendly design", detail: "so phones turn into calls." },
+  { lead: "Easy contact forms", detail: "that actually work and route to you." },
+  { lead: "Clear offer + location", detail: "so the right local buyers pick you." },
 ];
 
 const cardSx = {
@@ -50,9 +50,9 @@ export default function ProblemSolutionSection() {
   return (
     <Section
       id="problems"
-      eyebrow="Why this matters"
-      title="Your website might be costing you customers."
-      subtitle="Most sites fail for predictable reasons. Fixing them is straightforward when you know what to prioritize."
+      eyebrow="Value proposition"
+      title="I rebuild your site so more customers contact you."
+      subtitle="The business problem is missed inquiries. The outcome is a site that loads fast, reads clearly, and makes it easy to reach you."
       variant="plain"
       disableSpine
     >
@@ -100,7 +100,7 @@ export default function ProblemSolutionSection() {
                   >
                     <WarningAmberOutlinedIcon color="warning" />
                   </Box>
-                  <Typography variant="h6">Problem signals</Typography>
+                  <Typography variant="h6">The business problem</Typography>
                 </Stack>
                 <Stack spacing={1.25}>
                   {problems.map((problem) => (
@@ -174,9 +174,9 @@ export default function ProblemSolutionSection() {
                   >
                     <CheckCircleOutlineIcon color="primary" />
                   </Box>
-                  <Typography variant="h6">What changes after the rebuild</Typography>
+                  <Typography variant="h6">You get</Typography>
                 </Stack>
-                <Stack spacing={1.25}>
+                <Stack spacing={4}>
                   {solution.map((item) => (
                     <Stack key={item.lead} direction="row" spacing={1.5} alignItems="flex-start">
                       <Box
@@ -203,6 +203,18 @@ export default function ProblemSolutionSection() {
           </Card>
         </Grid>
       </Grid>
+      <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
+        <Button
+          variant="contained"
+          size="large"
+          onClick={() => {
+            const el = document.getElementById("cta");
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+        >
+          Get a free site review
+        </Button>
+      </Box>
     </Section>
   );
 }

@@ -225,7 +225,7 @@ export default function CtaSection() {
                   <Box component="form" onSubmit={handleSubmit} sx={{ position: "relative" }}>
                     <Stack spacing={2}>
                       <Stack spacing={1}>
-                        <Typography variant="h5">Request a free review</Typography>
+                        <Typography variant="h5">Get a free site review</Typography>
                         <Typography variant="body2" color="text.secondary">
                           A few details help me tailor the feedback to your goals.
                         </Typography>
@@ -358,7 +358,7 @@ export default function CtaSection() {
                             },
                           }}
                         >
-                          {isLoading ? "Sending..." : "Send my site"}
+                          {isLoading ? "Sending..." : "Get my free site review"}
                         </Button>
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
                           No obligation. I&apos;ll tell you if a rebuild is not needed.
@@ -390,7 +390,7 @@ export default function CtaSection() {
                     <Typography variant="h6">What happens next</Typography>
                     <Stack
                       component="ul"
-                      spacing={2}
+                      spacing={4}
                       sx={{ m: 0, p: 0, listStyle: "none", color: "text.secondary" }}
                     >
                       {[
@@ -419,7 +419,7 @@ export default function CtaSection() {
                     <Typography variant="h6">What I check</Typography>
                     <Stack
                       component="ul"
-                      spacing={2}
+                      spacing={4}
                       sx={{ m: 0, p: 0, listStyle: "none", color: "text.secondary" }}
                     >
                       {[

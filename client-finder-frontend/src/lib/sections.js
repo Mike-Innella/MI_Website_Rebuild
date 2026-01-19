@@ -16,9 +16,9 @@ export const homeSections = [
     2,
     "problem-solution",
   ),
-  createSection(() => import("@/components/sections/OfferSection"), 3, "offer"),
   createSection(() => import("@/components/sections/ProofSection"), 2, "proof"),
-  createSection(() => import("@/components/sections/ProcessSection"), 3, "process"),
+  createSection(() => import("@/components/sections/OfferSection"), 3, "offer"),
   createSection(() => import("@/components/sections/PricingSection"), 3, "pricing"),
+  createSection(() => import("@/components/sections/ProcessSection"), 3, "process"),
   createSection(() => import("@/components/sections/CtaSection"), 1, "cta"),
 ];

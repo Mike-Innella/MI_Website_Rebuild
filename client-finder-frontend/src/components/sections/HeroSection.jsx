@@ -20,9 +20,9 @@ import { maxHeroWidth, maxTextWidth, sectionPaddingY } from "@/lib/layoutTokens"
 import { cardPad, mutedSurface, primarySurface } from "@/lib/uiStyles";
 
 const previewSteps = [
-  { label: "This is what I fix", detail: "Problem signals", sectionId: "problems" },
-  { label: "This is how it changes", detail: "7-day rebuild", sectionId: "offer" },
-  { label: "This is the outcome", detail: "Clarity + contact", sectionId: "proof" },
+  { label: "See what you get", detail: "Faster, clearer, easier", sectionId: "problems" },
+  { label: "How I rebuild", detail: "7-day turnaround", sectionId: "offer" },
+  { label: "Proof of outcomes", detail: "Before vs after", sectionId: "proof" },
 ];
 
 const heroHighlights = [
@@ -162,7 +162,8 @@ export default function HeroSection() {
               </Stack>
 
               <Typography
-                variant="h2"
+                component="h1"
+                variant="h1"
                 fontWeight={900}
                 sx={{
                   letterSpacing: "-0.03em",
@@ -173,7 +174,12 @@ export default function HeroSection() {
                 className="reveal"
                 style={{ "--delay": "120ms" }}
               >
-                I rebuild outdated websites for small businesses so customers can actually find and contact you.
+                <Box component="span" sx={{ display: "block" }}>
+                  Fast, modern websites that get more customers to reach out.
+                </Box>
+                <Box component="span" sx={{ display: "block", mt: 0.25 }}>
+                  7-day rebuild — no tech headaches.
+                </Box>
               </Typography>
 
               <Typography
@@ -188,8 +194,8 @@ export default function HeroSection() {
                 className="reveal"
                 style={{ "--delay": "200ms" }}
               >
-                Fast, modern, and clear. You get a polished site that looks sharp on every device and makes it easy to
-                take the next step.
+                For small businesses that want more calls and inquiries without tech hassles. I rebuild your site so it
+                loads fast, reads clearly, and points visitors to one next step.
               </Typography>
 
               <Box
@@ -208,7 +214,7 @@ export default function HeroSection() {
                     endIcon={<ArrowForwardIcon />}
                     onClick={scrollToCta}
                   >
-                    Send my site for a free review
+                    Get a free site review
                   </Button>
                   <Button
                     variant="text"
@@ -254,14 +260,14 @@ export default function HeroSection() {
               >
                 <Image
                   src={theme.palette.mode === "light" ? "/assets/MILogo_dark.png" : "/assets/MILogo.png"}
-                  alt="MI Logo"
+                  alt="MI Website Rebuilds logo"
                   width={28}
                   height={28}
                   sizes="28px"
-                  loading="lazy"
+                  priority
                 />
                 <Typography color="text.secondary">
-                  Built for clarity, speed, and one action: contact you.
+                  Built with Next.js and Tailwind best practices, optimized for one action: contact you.
                 </Typography>
               </Paper>
             </Stack>

@@ -62,7 +62,7 @@ export default function Section({
               ) : null}
 
               {title ? (
-                <Typography variant="h3" fontWeight={800}>
+                <Typography component="h2" variant="h3" fontWeight={800}>
                   {title}
                 </Typography>
               ) : null}
