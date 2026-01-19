@@ -20,6 +20,30 @@ const ChatBody = z.object({
 
 const MAX_CHAT_TOKENS = 140;
 
+const faqFallbacks: { test: RegExp; reply: string }[] = [
+  {
+    test: /how fast|timeline|speed|turnaround/i,
+    reply: "We rebuild and relaunch in 7 days: day 1 kickoff, days 2-4 design + copy, days 5-6 build + QA, day 7 launch with analytics and SEO in place.",
+  },
+  {
+    test: /pricing|cost|charge/i,
+    reply: "Flat project rate with no retainers. You get design, copy, build, speed/SEO tuning, analytics, and launch support. Share your site and goals and I’ll confirm scope.",
+  },
+  {
+    test: /what'?s included|include|deliverable|scope/i,
+    reply: "Included: refreshed design, conversion-focused copy, mobile and speed tuning, on-page SEO, analytics + lead tracking, and launch support. One-week turnaround.",
+  },
+  {
+    test: /how do i start|get started|begin|next step/i,
+    reply: "Share your business name, website URL, and best email and I’ll review your site, confirm scope, and lock your 7-day slot.",
+  },
+];
+
+function pickFaqFallback(message) {
+  const hit = faqFallbacks.find(({ test }) => test.test(message));
+  return hit?.reply || null;
+}
+
 function leadIntentFromFields(fields) {
   const hasWebsite = Boolean(fields.websiteUrl);
   const hasEmail = Boolean(fields.email);
@@ -33,7 +57,7 @@ function leadIntentFromFields(fields) {
 
 function shouldSkipRag(message) {
   const wordCount = message.split(/\s+/).filter(Boolean).length;
-  return wordCount < 4 || message.length < 28;
+  return wordCount < 2 && message.length < 10;
 }
 
 function writeNdjson(res, payload) {
@@ -96,7 +120,8 @@ chatRouter.post("/chat", async (req, res) => {
 
     const system = [
       "You are a brief website consultant.",
-      "Rules: reply under 60 words, ask one question at a time.",
+      "Rules: reply under 60 words, answer the user's question directly, then ask one qualifying question.",
+      "Do not ask for more detail unless the question is unclear.",
       "Do not mention any tech stack or implementation details.",
       "Use the knowledge base context when relevant.",
       'Single CTA: "free website review".',
@@ -142,7 +167,8 @@ chatRouter.post("/chat", async (req, res) => {
           writeNdjson(res, { type: "token", token });
         }
 
-        const finalReply = fullReply.trim() || "Could you share a bit more detail?";
+        const faqFallback = pickFaqFallback(message);
+        const finalReply = fullReply.trim() || faqFallback || "Could you share a bit more detail?";
         if (!aborted) {
           await appendMessage(sessionId, "assistant", finalReply);
         }
@@ -180,8 +206,10 @@ chatRouter.post("/chat", async (req, res) => {
 
     const completion = await openai.chat.completions.create(completionArgs);
 
+    const faqFallback = pickFaqFallback(message);
+
     const reply =
-      completion.choices?.[0]?.message?.content?.trim() || "Could you share a bit more detail?";
+      completion.choices?.[0]?.message?.content?.trim() || faqFallback || "Could you share a bit more detail?";
     await appendMessage(sessionId, "assistant", reply);
 
     const extracted = extractFieldsFromText(
