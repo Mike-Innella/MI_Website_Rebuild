@@ -46,6 +46,8 @@ Notes:
 
 - `CLIENT_ORIGIN` must be the origin only (no path/query).
 - Render sets `PORT` automatically; the server reads it from `process.env.PORT`.
+- For fastest replies, keep `OPENAI_MODEL` on a fast tier (default `gpt-4o-mini`) and keep the Render instance warm (min instance + health pings).
+- Chat endpoint streams NDJSON when `stream: true` is passed. Tokens arrive as `{type:\"token\", token}` and completion metadata as `{type:\"final\", ...}` with trimmed RAG + cached context to reduce latency.
 
 ## Local verification
 

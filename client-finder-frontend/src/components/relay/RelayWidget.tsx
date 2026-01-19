@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -44,6 +44,7 @@ export default function RelayWidget() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
   const [leadIntent, setLeadIntent] = useState("");
+  const streamingIndexRef = useRef<number | null>(null);
 
   const apiBaseUrl = useMemo(() => {
     const configured = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -86,7 +87,38 @@ export default function RelayWidget() {
     }
   }, [sessionId]);
 
-  const sendMessage = async (text: any) => {
+  const setAssistantContent = (content: string) => {
+    setMessages((prev) => {
+      const idx = streamingIndexRef.current;
+      if (idx == null || idx < 0 || idx >= prev.length) return prev;
+      const next = [...prev];
+      next[idx] = { ...next[idx], content };
+      return next;
+    });
+  };
+
+  const removeAssistantPlaceholder = () => {
+    setMessages((prev) => {
+      const idx = streamingIndexRef.current;
+      if (idx == null || idx < 0 || idx >= prev.length) return prev;
+      const next = [...prev];
+      if (!next[idx]?.content) {
+        next.splice(idx, 1);
+      }
+      return next;
+    });
+    streamingIndexRef.current = null;
+  };
+
+  const beginMessageFlow = (userText: string) => {
+    setMessages((prev) => {
+      const next = [...prev, { role: "user", content: userText }, { role: "assistant", content: "" }];
+      streamingIndexRef.current = next.length - 1;
+      return next;
+    });
+  };
+
+  const sendMessage = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
 
@@ -95,29 +127,36 @@ export default function RelayWidget() {
       return;
     }
 
-    setMessages((prev) => [...prev, { role: "user", content: trimmed }]);
+    beginMessageFlow(trimmed);
     setInput("");
     setIsSending(true);
     setError("");
+    setLeadIntent("");
+
+    let fullReply = "";
 
     try {
       const response = await fetch(`${apiBaseUrl}/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/x-ndjson",
+        },
         body: JSON.stringify({
           sessionId: sessionId || undefined,
           message: trimmed,
+          stream: true,
         }),
       });
 
-      let data = null;
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
+      const contentType = response.headers.get("content-type") || "";
       if (!response.ok) {
+        let data: any = null;
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
         const serverMessage = data?.error || "Relay could not reach the server.";
         const detail =
           process.env.NODE_ENV !== "production" && data?.detail
@@ -126,18 +165,81 @@ export default function RelayWidget() {
         throw new Error(`${serverMessage}${detail}`);
       }
 
-      if (!data?.reply) {
-        throw new Error("Relay did not return a response.");
+      if (contentType.includes("application/x-ndjson") && response.body) {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let receivedFinal = false;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (value) {
+            buffer += decoder.decode(value, { stream: !done });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line.trim()) continue;
+              let payload: any;
+              try {
+                payload = JSON.parse(line);
+              } catch {
+                continue;
+              }
+              if (payload.type === "token" && payload.token) {
+                fullReply += payload.token;
+                setAssistantContent(fullReply);
+              } else if (payload.type === "final") {
+                receivedFinal = true;
+                fullReply = (payload.reply || fullReply || "").trim();
+                if (fullReply) {
+                  setAssistantContent(fullReply);
+                }
+                if (payload.sessionId || sessionId) {
+                  setSessionId(payload.sessionId || sessionId);
+                }
+                setLeadIntent(payload.leadIntent || "");
+              } else if (payload.type === "error") {
+                throw new Error(payload.error || "Relay ran into an error.");
+              }
+            }
+          }
+          if (done) break;
+        }
+
+        if (!receivedFinal && fullReply) {
+          fullReply = fullReply.trim();
+          setAssistantContent(fullReply);
+        }
+
+        fullReply = fullReply.trim();
+
+        if (!fullReply) {
+          throw new Error("Relay did not return a response.");
+        }
+      } else {
+        const data = await response.json();
+        if (!data?.reply) {
+          throw new Error("Relay did not return a response.");
+        }
+        fullReply = String(data.reply || "").trim();
+        if (!fullReply) {
+          throw new Error("Relay did not return a response.");
+        }
+        setAssistantContent(fullReply);
+        setSessionId(data.sessionId || sessionId);
+        setLeadIntent(data.leadIntent || "");
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply },
-      ]);
-      setSessionId(data.sessionId || sessionId);
-      setLeadIntent(data.leadIntent || "");
+      streamingIndexRef.current = null;
     } catch (fetchError) {
-      setError(fetchError?.message || "Relay ran into an error.");
+      removeAssistantPlaceholder();
+      const message =
+        fetchError instanceof Error
+          ? fetchError.message
+          : typeof fetchError === "string"
+            ? fetchError
+            : "Relay ran into an error.";
+      setError(message || "Relay ran into an error.");
     } finally {
       setIsSending(false);
     }
@@ -228,6 +330,9 @@ export default function RelayWidget() {
           <Stack spacing={2} sx={{ px: 2, py: 2, flexGrow: 1, overflowY: "auto" }}>
             {messages.map((message, index) => {
               const isUser = message.role === "user";
+              if (!message.content?.trim()) {
+                return null;
+              }
               return (
                 <Box
                   key={`${message.role}-${index}`}

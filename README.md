@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repo contains a Next.js frontend and an Express API backed by Supabase Postgres and OpenAI.
+This repo contains a Next.js frontend and an Express API backed by Supabase Postgres and OpenAI. The AI assistant ("Relay") streams replies token-by-token for fast perceived response time and uses a trimmed RAG context plus caching to stay responsive.
 
 ## Structure
 
@@ -70,6 +70,8 @@ Notes:
 - `CLIENT_ORIGIN` must be origin-only (no path/query).
 - CORS allows Vercel preview deploys (`https://*.vercel.app`) in production.
 - Render sets `PORT` automatically; the server reads it from `process.env.PORT`.
+- SEO/meta: update `client-finder-frontend/src/lib/siteConfig.ts` for title, description, keywords, social images, and structured data. Layout metadata (Open Graph, Twitter, canonical) is derived from this config.
+- Relay streaming: the frontend posts with `stream: true` and consumes NDJSON tokens; backend caps responses with low temperature + max tokens for speed.
 
 ## Health check
 
