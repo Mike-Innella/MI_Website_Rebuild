@@ -1,0 +1,35 @@
+{
+  "name": "website-ai-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "backfill:chunks": "node src/scripts/backfill_kb_chunks.js",
+    "test:db": "node src/scripts/test_db.js",
+    "test:rag": "node src/scripts/test_rag_chunks.js",
+    "test:rag:docs": "node src/scripts/test_rag_retrieval.js",
+    "test:rag:db": "node src/scripts/test_db_match_self.js",
+    "test:all": "node src/scripts/test_all.js",
+    "embed": "node src/scripts/embed_kb_docs.js",
+    "seed:kb": "node src/scripts/seed_kb_docs_from_site.js",
+    "seed:facts": "node src/scripts/seed_assistant_facts.js",
+    "seed:all": "node src/scripts/seed_kb_docs_from_site.js && node src/scripts/seed_assistant_facts.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.1.0",
+    "openai": "^6.16.0",
+    "pg": "^8.17.1",
+    "postgres": "^3.4.8",
+    "zod": "^4.1.5"
+  },
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
