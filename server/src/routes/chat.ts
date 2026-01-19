@@ -19,7 +19,6 @@ const ChatBody = z.object({
 });
 
 const MAX_CHAT_TOKENS = 140;
-const CHAT_TEMPERATURE = 0.25;
 
 function leadIntentFromFields(fields) {
   const hasWebsite = Boolean(fields.websiteUrl);
@@ -115,7 +114,6 @@ chatRouter.post("/chat", async (req, res) => {
       model: env.OPENAI_MODEL,
       messages,
       max_completion_tokens: MAX_CHAT_TOKENS,
-      temperature: CHAT_TEMPERATURE,
     };
 
     if (stream) {
