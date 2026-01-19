@@ -81,7 +81,7 @@ export default function OfferSection() {
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: "flex" }}>
           <Card
             className="reveal"
-            style={{ "--delay": "80ms" }}
+            style={{ "--delay": "80ms" } as any}
             sx={{
               flex: 1,
               height: "100%",
@@ -146,7 +146,7 @@ export default function OfferSection() {
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: "flex" }}>
           <Card
             className="reveal"
-            style={{ "--delay": "140ms" }}
+            style={{ "--delay": "140ms" } as any}
             sx={{
               flex: 1,
               borderRadius: "var(--radius-card)",
@@ -309,7 +309,7 @@ export default function OfferSection() {
         <Grid size={{ xs: 12, md: 4 }} sx={{ display: "flex" }}>
           <Card
             className="reveal"
-            style={{ "--delay": "200ms" }}
+            style={{ "--delay": "200ms" } as any}
             sx={{
               flex: 1,
               borderRadius: "var(--radius-card)",

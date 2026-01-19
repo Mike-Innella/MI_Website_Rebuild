@@ -19,7 +19,7 @@ import { useState } from "react";
 export default function Footer() {
   const theme = useTheme();
   const year = new Date().getFullYear();
-  const [activeModal, setActiveModal] = useState(null);
+  const [activeModal, setActiveModal] = useState<string | null>(null);
 
   const footerLinks = [
     {

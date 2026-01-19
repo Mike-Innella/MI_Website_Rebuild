@@ -10,10 +10,10 @@ export default function Section({
   title,
   subtitle,
   children,
-  sx,
+  sx = {},
   variant = "plain",
   disableSpine = false,
-}) {
+}: any) {
   const theme = useTheme();
   const hasHeader = Boolean(eyebrow || title || subtitle);
   const lightMode = theme.palette.mode === "light";

@@ -1,5 +1,6 @@
 import "./globals.css";
 import "../components/skeleton/skeleton.css";
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
@@ -11,7 +12,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     default: siteConfig.siteName,
     template: `%s | ${siteConfig.siteName}`,

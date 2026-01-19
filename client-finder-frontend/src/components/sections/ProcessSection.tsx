@@ -37,8 +37,8 @@ const steps = [
 export default function ProcessSection() {
   const theme = useTheme();
   const lightMode = theme.palette.mode === "light";
-  const [activeIndex, setActiveIndex] = useState(null);
-  const [hoverIndex, setHoverIndex] = useState(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   return (
     <Section
@@ -69,7 +69,7 @@ export default function ProcessSection() {
               <Box
                 key={step.title}
                 className="reveal"
-                style={{ "--delay": `${80 + index * 80}ms` }}
+                style={{ "--delay": `${80 + index * 80}ms` } as any}
                 sx={{
                   position: "relative",
                   mt: { xs: 0, md: index % 2 === 0 ? 0 : 1.5 },

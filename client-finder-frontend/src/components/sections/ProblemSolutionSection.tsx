@@ -74,7 +74,7 @@ export default function ProblemSolutionSection() {
               "&::after": { ...cardSx["&::after"], background: warmGlow },
             }}
             className="reveal"
-            style={{ "--delay": "80ms" }}
+            style={{ "--delay": "80ms" } as any}
           >
             <CardContent
               sx={{
@@ -148,7 +148,7 @@ export default function ProblemSolutionSection() {
               },
             }}
             className="reveal"
-            style={{ "--delay": "140ms" }}
+            style={{ "--delay": "140ms" } as any}
           >
             <CardContent
               sx={{

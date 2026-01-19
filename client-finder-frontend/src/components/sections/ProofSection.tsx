@@ -67,7 +67,7 @@ export default function ProofSection() {
               <Stack
                 spacing={2.25}
                 className="reveal"
-                style={{ "--delay": `${80 + index * 80}ms` }}
+                style={{ "--delay": `${80 + index * 80}ms` } as any}
                 sx={{ height: "100%", justifyContent: "center" }}
               >
                 <Typography variant="overline" color="text.secondary">
@@ -127,7 +127,7 @@ export default function ProofSection() {
               <Stack spacing={2} sx={{ height: "100%", width: "100%" }}>
                 <Card
                   className="reveal"
-                  style={{ "--delay": `${140 + index * 80}ms` }}
+                  style={{ "--delay": `${140 + index * 80}ms` } as any}
                   sx={{
                     flex: 1,
                     height: "100%",
