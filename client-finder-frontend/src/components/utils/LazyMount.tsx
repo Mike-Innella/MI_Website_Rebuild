@@ -7,8 +7,11 @@ export default function LazyMount({ fallback = null, children, rootMargin = "300
   const [show, setShow] = useState(false);
   const anchorId = useMemo(() => {
     const child = Array.isArray(children) ? children[0] : children;
-    if (isValidElement(child) && child.props?.id) {
-      return child.props.id;
+    if (isValidElement(child)) {
+      const id = (child.props as { id?: string })?.id;
+      if (id) {
+        return id;
+      }
     }
     return undefined;
   }, [children]);
