@@ -40,6 +40,12 @@ DATABASE_URL_DIRECT=...
 OPENAI_API_KEY=...
 OPENAI_MODEL=gpt-5-nano-2025-08-07
 OPENAI_EMBED_MODEL=text-embedding-3-small
+LEAD_ALERT_EMAIL=mainnella@gmail.com
+SMTP_HOST=...
+SMTP_PORT=587
+SMTP_USER=...
+SMTP_PASS=...
+EMAIL_FROM="Relay <no-reply@yourdomain.com>"
 ```
 
 Notes:
@@ -48,6 +54,7 @@ Notes:
 - Render sets `PORT` automatically; the server reads it from `process.env.PORT`.
 - For fastest replies, keep `OPENAI_MODEL` on a fast tier (default `gpt-4o-mini`) and keep the Render instance warm (min instance + health pings).
 - Chat endpoint streams NDJSON when `stream: true` is passed. Tokens arrive as `{type:\"token\", token}` and completion metadata as `{type:\"final\", ...}` with trimmed RAG + cached context to reduce latency.
+- Lead alert email is optional; if SMTP or `LEAD_ALERT_EMAIL` is missing, the server will skip sending but keep chat responses working.
 
 ## Local verification
 
@@ -72,19 +79,12 @@ npm run test:all
 npm run backfill:chunks
 ```
 
-## Seed site knowledge + facts
+## Seed site knowledge
 
-Run the SQL once to create the assistant facts table:
-
-```bash
-# run in Supabase SQL Editor
-server/sql/assistant_facts.sql
-```
-
-Seed curated site copy into `kb_docs` and structured facts into `assistant_facts`:
+Seed curated site copy into `kb_docs`:
 
 ```bash
-npm run seed:all
+npm run seed:kb
 ```
 
 Then refresh embeddings + chunks:

@@ -1,11 +1,28 @@
 import { pool } from "../db/pool.js";
 
 let ensuredSessionGoalColumn = false;
+let ensuredLeadColumns = false;
 
 async function ensureGoalColumn() {
   if (ensuredSessionGoalColumn) return;
   await pool.query("alter table public.chat_sessions add column if not exists goal text");
   ensuredSessionGoalColumn = true;
+}
+
+async function ensureLeadColumns() {
+  if (ensuredLeadColumns) return;
+
+  await pool.query("alter table public.chat_sessions add column if not exists lead_score int4");
+  await pool.query("alter table public.chat_sessions add column if not exists lead_signals text[]");
+  await pool.query("alter table public.chat_sessions add column if not exists is_lead boolean");
+  await pool.query(
+    "alter table public.chat_sessions add column if not exists lead_first_seen_at timestamptz",
+  );
+  await pool.query(
+    "alter table public.chat_sessions add column if not exists lead_email_sent_at timestamptz",
+  );
+
+  ensuredLeadColumns = true;
 }
 
 export async function getOrCreateSession(sessionId) {
@@ -66,5 +83,61 @@ export async function upsertChatSession(sessionId, data) {
   await pool.query(
     `update public.chat_sessions set ${updates.join(", ")} where session_id = $${idx}`,
     values,
+  );
+}
+
+export async function markSessionLead(
+  sessionId: string,
+  data: { score: number; signals: string[] },
+) {
+  await ensureLeadColumns();
+
+  const score = Number(data?.score || 0);
+  const signals = Array.isArray(data?.signals) ? data.signals : [];
+
+  if (!sessionId) throw new Error("sessionId required");
+  if (score <= 0 && signals.length === 0) {
+    return { becameLeadNow: false };
+  }
+
+  const result = await pool.query(
+    `
+    update public.chat_sessions
+    set
+      lead_score = greatest(coalesce(lead_score, 0), $2),
+      lead_signals = (
+        select array(
+          select distinct unnest(coalesce(lead_signals, '{}'::text[]) || $3::text[])
+        )
+      ),
+      is_lead = case
+        when greatest(coalesce(lead_score, 0), $2) >= 3 then true
+        else coalesce(is_lead, false)
+      end,
+      lead_first_seen_at = case
+        when coalesce(is_lead, false) = false and greatest(coalesce(lead_score, 0), $2) >= 3
+          then now()
+        else lead_first_seen_at
+      end
+    where session_id = $1
+    returning is_lead, lead_first_seen_at, lead_email_sent_at
+    `,
+    [sessionId, score, signals],
+  );
+
+  const row = result.rows?.[0];
+  const isLead = Boolean(row?.is_lead);
+  const firstSeen = row?.lead_first_seen_at as string | null;
+  const emailSent = row?.lead_email_sent_at as string | null;
+
+  const becameLeadNow = isLead && Boolean(firstSeen) && !emailSent;
+  return { becameLeadNow };
+}
+
+export async function markLeadEmailSent(sessionId: string) {
+  await ensureLeadColumns();
+  await pool.query(
+    `update public.chat_sessions set lead_email_sent_at = coalesce(lead_email_sent_at, now()) where session_id = $1`,
+    [sessionId],
   );
 }

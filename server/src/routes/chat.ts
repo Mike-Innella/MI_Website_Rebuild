@@ -9,10 +9,11 @@ import {
   appendMessage,
   getOrCreateSession,
   getRecentMessages,
-  upsertChatSession,
+  markLeadEmailSent,
+  markSessionLead,
 } from "../services/sessions.js";
-import { extractFieldsFromText } from "../services/leadScoring.js";
-import { buildFactsContext, getAssistantFacts } from "../services/assistantFacts.js";
+import { detectLeadSignals } from "../services/leadSignals.js";
+import { sendLeadAlertEmail } from "../services/mailer.js";
 
 export const chatRouter = Router();
 
@@ -23,114 +24,42 @@ const ChatBody = z.object({
   stream: z.boolean().optional(),
 });
 
-const CTA = { label: "Request 5-minute review", href: "#contact" };
-const CTA_LINE = "Want to request the 5-minute review?";
-const LEAD_CAPTURE_LINE =
-  "Perfect - the form takes ~30 seconds. Drop your site URL and I'll send the review.";
-const MAX_CHAT_TOKENS = 160;
-const MIN_SIMILARITY = 0.78;
-const MATCH_COUNT = 4;
-const GOALS = ["more calls", "more leads", "more sales"];
-
-const REDIRECT_PATTERNS = [
-  /can you build an app/i,
-  /\bseo\b/i,
-  /\bads?\b/i,
-  /\blogo\b/i,
-  /\bbranding\b/i,
-  /what stack/i,
-  /\breact\b/i,
-];
-
-const ALLOW_RAG_PATTERNS = [
-  /price|cost|how much|pricing/i,
-  /timeline|turnaround|response time|how fast/i,
-  /include|included|not included|scope|deliverable/i,
-  /privacy|data policy|gdpr/i,
-  /review|loom/i,
-  /process|steps?/i,
-];
-
-const LEAD_CAPTURE_PATTERNS = [
-  /\byes\b|\bsure\b|\bsounds good\b|\blet'?s go\b|\bdo it\b|\bsend it\b/i,
-  /how do i start/i,
-  /where'?s the form/i,
-  /can you look at my site/i,
-];
-
-const TAG_RULES = [
-  { tag: "site:pricing", test: /price|cost|pricing|how much/i },
-  { tag: "site:process", test: /process|timeline|turnaround|response time|how fast/i },
-  { tag: "site:privacy", test: /privacy|data policy|gdpr/i },
-  { tag: "site:offer", test: /include|included|not included|deliverable|scope/i },
-  { tag: "site:cta", test: /review|loom|form|cta/i },
-];
-
 const SYSTEM_PROMPT = [
-  "You are Relay, a small assistant on a website that offers a 5-minute website review.",
-  "Your job is to reduce friction and guide the visitor to request the 5-minute review.",
-  "Rules (must follow):",
-  "- Keep responses under 60 words.",
-  "- Use at most 1 short paragraph OR 2 short paragraphs.",
-  "- One idea per reply; stay focused.",
-  "- No bullet lists unless explicitly asked.",
-  "- Do NOT explain multiple service options or compare tiers.",
-  "- Do NOT negotiate pricing or timelines beyond what the site already states.",
-  "- If the user asks anything outside: review, process, included/not included, privacy, timeline, or fit -> redirect to the 5-minute review form.",
-  "- Always re-anchor to the 5-minute review with a gentle CTA (or one clarifying question if absolutely required).",
-  "- If you use provided context, paraphrase it briefly; do not quote large sections.",
+  "You are Relay, a concise business-only assistant for a website rebuild service.",
+  "Answer only business questions about offers, pricing ranges, timelines/process, support plans, policies, and how to contact the team.",
+  "Politely refuse website reviews or audits and restate that you only provide business info.",
+  "Do not sell or push scheduling, demos, or forms; keep a neutral, helpful tone.",
+  "Keep replies short (2-6 sentences) and paraphrase any provided context without bullet lists unless explicitly requested.",
+].join(" ");
+const BASELINE_CONTEXT = [
+  "Service: 5-page business website rebuilds focused on clarity, credibility, and conversion.",
+  "Delivery: Typical turnaround is 7 days.",
+  "Pricing: Most projects land between $1,000-$1,500; pricing floors pre-qualify serious projects.",
+  "Support: Optional ongoing support at $100/month covering hosting and small content/text updates.",
+  "Process: 1) Audit your current site, 2) Rewrite structure and messaging, 3) Rebuild with conversion focus, 4) Launch with analytics in place.",
 ].join("\n");
+const REVIEW_REFUSAL =
+  "I can't review websites or judge design quality. I only cover business details like offers, pricing ranges, timelines, support, and policies.";
+const FALLBACK_REPLY =
+  "I can help with your website rebuild—scope, pricing, timeline, support, and policies. What do you want to know?";
+const OFFTOPIC_REPLY =
+  "I only handle questions about the website rebuild—scope, pricing, timeline, support, or policies. I can't help with unrelated topics.";
+const REVIEW_PATTERNS =
+  /\b(review|audit|critique|look at (my|our) site|look at my website|assess my website)\b/i;
+const MAX_CHAT_TOKENS = 180;
+const MATCH_COUNT = 6;
+const MIN_SIMILARITY = 0.0;
 
 function writeNdjson(res, payload) {
   res.write(`${JSON.stringify(payload)}\n`);
 }
 
-function ensureCta(reply: string, ctaLine = CTA_LINE) {
-  const trimmed = String(reply || "").trim();
-  if (!trimmed) return "";
-  const lower = trimmed.toLowerCase();
-  const hasReview = lower.includes("review");
-  const hasAsk = lower.includes("request") || lower.includes("form");
-  if (hasReview && hasAsk) return trimmed;
-  const spacer = trimmed.endsWith(".") || trimmed.endsWith("?") ? " " : ". ";
-  return `${trimmed}${spacer}${ctaLine}`;
-}
-
-function clampReply(reply: string, ctaLine = CTA_LINE) {
+function normalizeReply(reply: string) {
   const normalized = String(reply || "").replace(/\s+/g, " ").trim();
   if (!normalized) return "";
   const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [normalized];
-  const limited = sentences.slice(0, 2).join(" ").trim();
-  const capped =
-    limited.length > 420 ? `${limited.slice(0, 400).trim().replace(/[.!?]*$/, "")}.` : limited;
-  return ensureCta(capped, ctaLine);
-}
-
-function buildRedirectReply() {
-  return "I can help with that, but the fastest first step is the 5-minute review so you know what to fix first. Want to request it now?";
-}
-
-function noContextReply() {
-  return "I can cover that in a quick 5-minute review and point to the fixes that matter most. Want to request it?";
-}
-
-function detectTags(message: string) {
-  const lower = String(message || "");
-  const matches = TAG_RULES.filter(({ test }) => test.test(lower)).map(({ tag }) => tag);
-  return Array.from(new Set(matches));
-}
-
-function classifyIntent(message: string, fields: ReturnType<typeof extractFieldsFromText>) {
-  const allowRag = ALLOW_RAG_PATTERNS.some((regex) => regex.test(message));
-  const leadCapture =
-    LEAD_CAPTURE_PATTERNS.some((regex) => regex.test(message)) || Boolean(fields.websiteUrl);
-  const redirect = REDIRECT_PATTERNS.some((regex) => regex.test(message)) || (!allowRag && !leadCapture);
-  return {
-    allowRag,
-    leadCapture,
-    redirect,
-    tags: allowRag ? detectTags(message) : [],
-  };
+  const limited = sentences.slice(0, 6).join(" ").trim();
+  return limited.length > 720 ? `${limited.slice(0, 700).trim().replace(/[.!?]*$/, "")}.` : limited;
 }
 
 function collectChunkTags(docs) {
@@ -138,6 +67,70 @@ function collectChunkTags(docs) {
     .flatMap((doc) => (Array.isArray(doc.tags) ? doc.tags : []))
     .filter((tag) => typeof tag === "string");
   return Array.from(new Set(tags));
+}
+
+const SPECIFICITY_RULES = [
+  { topic: "pricing", test: /price|pricing|cost|budget|quote|estimate/i },
+  { topic: "timeline", test: /timeline|turnaround|how fast|deadline|how long|lead time/i },
+  { topic: "stack", test: /\bstack\b|tech stack|technology|framework|react|next\.?js?|supabase|postgres|openai/i },
+  { topic: "scope", test: /include|included|scope|deliverables?|pages?|what's included|what is included/i },
+  { topic: "support", test: /support|maintenance|updates|hosting|care plan/i },
+  { topic: "policy", test: /privacy|gdpr|data policy|terms|refund|guarantee/i },
+  { topic: "start", test: /how do i start|how to start|get started|next steps|kickoff|begin/i },
+];
+
+function detectSpecificity(message: string) {
+  const lower = String(message || "");
+  const hits = SPECIFICITY_RULES.filter(({ test }) => test.test(lower)).map((r) => r.topic);
+  return { forceKb: hits.length > 0, topics: Array.from(new Set(hits)) };
+}
+
+function isGreeting(message: string) {
+  const normalized = String(message || "").trim().toLowerCase();
+  if (normalized.length > 24) return false;
+  return /^(hi|hello|hey|yo|howdy|sup|hola|hiya)\b/.test(normalized);
+}
+
+function shouldOfferForm(message: string, specificity: { forceKb: boolean; topics: string[] }) {
+  const lower = String(message || "").toLowerCase();
+  if (specificity.topics.includes("start")) return true;
+  if (/\b(next steps?|how do i start|how to start|how to proceed|ready to start|let'?s go|proceed|get started)\b/i.test(lower))
+    return true;
+  return false;
+}
+
+function buildSpecificReply(topics: string[]) {
+  const set = new Set(topics || []);
+  if (set.has("pricing")) {
+    return "Most 5-page rebuilds land around $1,000–$1,500 with a ~7-day turnaround. Optional support is $100/month for hosting plus small text/content updates.";
+  }
+  if (set.has("scope")) {
+    return "Scope: 5-page business site rebuilt for clarity and conversion. Includes an audit of your current site, rewritten structure/messaging, the rebuild itself, and launch with analytics. Optional support is $100/month for hosting and small updates.";
+  }
+  if (set.has("timeline")) {
+    return "Turnaround is typically ~7 days after kickoff. The workflow is audit → rewrite structure/messaging → rebuild → launch with analytics. Optional support is $100/month for hosting and small updates.";
+  }
+  if (set.has("support")) {
+    return "Ongoing support is optional at $100/month; it covers hosting and small text/content updates. The core rebuild is a 5-page site delivered in about 7 days.";
+  }
+  if (set.has("policy")) {
+    return "I can share business details like scope, pricing, and timeline. If you need specifics on privacy or data handling, let me know and I’ll outline what’s available.";
+  }
+  if (set.has("stack")) {
+    return "I focus on delivering a fast, conversion-oriented 5-page site in ~7 days. If you need stack specifics, I can confirm them, but most clients just want the outcome: clearer messaging, faster load, and analytics in place.";
+  }
+  if (set.has("start")) {
+    return "To start, share your business name, site URL, and goals. I’ll audit your current site, rewrite the structure and messaging, rebuild a 5-page site for clarity and conversion, then launch with analytics—usually in about 7 days.";
+  }
+  return FALLBACK_REPLY;
+}
+
+function isOnTopic(message: string, usedKb: boolean, specificity: { forceKb: boolean; topics: string[] }) {
+  if (usedKb || specificity.forceKb) return true;
+  const lower = String(message || "");
+  return /\b(site|website|rebuild|page|pricing|price|cost|timeline|turnaround|process|support|hosting|policy|privacy|start|kickoff|scope|deliverable|stack|tech)\b/i.test(
+    lower,
+  );
 }
 
 chatRouter.post("/chat", async (req, res) => {
@@ -148,30 +141,10 @@ chatRouter.post("/chat", async (req, res) => {
 
   const sessionId = parsed.data.sessionId || randomUUID();
   const message = parsed.data.message.trim();
-  const messageLower = message.toLowerCase();
-  const stream = Boolean(parsed.data.stream);
-
-  let sessionGoal: string | null = null;
-
-  try {
-    const session = await getOrCreateSession(sessionId);
-
-    const detectedGoal = GOALS.find((g) => messageLower.includes(g)) || null;
-    const resolvedGoal = detectedGoal || session.goal || null;
-
-    if (detectedGoal && detectedGoal !== session.goal) {
-      await upsertChatSession(sessionId, { goal: detectedGoal });
-    }
-    sessionGoal = resolvedGoal;
-  } catch (error) {
-    console.error("[chat_sessions] query failed:", {
-      message: error?.message,
-      details: error?.details ?? error?.detail,
-      hint: error?.hint,
-      code: error?.code,
-    });
-    return res.status(500).json({ ok: false, error: "Server error" });
-  }
+  const streamRequested = Boolean(parsed.data.stream);
+  const stream = false; // disable streaming to avoid chunk issues; client handles JSON fallback
+  const specificity = detectSpecificity(message);
+  const greeting = isGreeting(message);
 
   let aborted = false;
   if (stream) {
@@ -185,173 +158,239 @@ chatRouter.post("/chat", async (req, res) => {
   }
 
   try {
+    await getOrCreateSession(sessionId);
     await appendMessage(sessionId, "user", message);
-
-    const fields = extractFieldsFromText(message);
-    const intent = classifyIntent(messageLower, fields);
-
-    const factsPromise = getAssistantFacts(12);
-    const recentPromise = getRecentMessages(sessionId, 8);
-
-    let docs = [];
-    let kbContext = "";
-    let usedKb = false;
-    let chunkTags = [];
-
-    if (intent.allowRag) {
-      try {
-        const queryEmbedding = await embedText(message);
-        docs = await retrieveKb(queryEmbedding, {
-          matchCount: MATCH_COUNT,
-          minSimilarity: MIN_SIMILARITY,
-          tags: intent.tags,
-        });
-        if (docs.length) {
-          usedKb = true;
-          chunkTags = collectChunkTags(docs);
-          kbContext = buildContext(docs);
-        }
-      } catch (error) {
-        console.error("[rag] retrieval failed:", {
-          message: error?.message,
-          details: error?.details ?? error?.detail,
-          hint: error?.hint,
-          code: error?.code,
-        });
-      }
+  } catch (error) {
+    console.error("[chat_sessions] query failed:", {
+      message: error?.message,
+      details: error?.details ?? error?.detail,
+      hint: error?.hint,
+      code: error?.code,
+    });
+    if (stream) {
+      writeNdjson(res, { type: "error", ok: false, error: "Server error" });
+      res.end();
+      return;
     }
+    return res.status(500).json({ ok: false, error: "Server error" });
+  }
 
-    let factsContext = "";
+  const recentPromise = getRecentMessages(sessionId, 20);
+
+  let usedKb = false;
+  let chunkTags: string[] = [];
+  let kbContext = "";
+
+  if (!greeting) {
     try {
-      const facts = await factsPromise;
-      factsContext = buildFactsContext(facts);
+      const queryEmbedding = await embedText(message);
+      const docs = await retrieveKb(queryEmbedding, {
+        matchCount: MATCH_COUNT,
+        minSimilarity: MIN_SIMILARITY,
+      });
+      if (docs.length) {
+        usedKb = true;
+        chunkTags = collectChunkTags(docs);
+        kbContext = buildContext(docs);
+      }
     } catch (error) {
-      console.error("[assistant_facts] query failed:", {
+      console.error("[rag] retrieval failed:", {
         message: error?.message,
         details: error?.details ?? error?.detail,
         hint: error?.hint,
         code: error?.code,
       });
     }
+  }
 
-    const recent = await recentPromise;
-    const metaBase = { usedKb, chunks: usedKb ? chunkTags : [] };
-
-    const sendReply = async (replyText: string, options: { meta?: any; ctaLine?: string } = {}) => {
-      const finalReply = clampReply(replyText, options.ctaLine ?? CTA_LINE);
-      if (aborted) return;
-      await appendMessage(sessionId, "assistant", finalReply);
-      const meta = options.meta ?? metaBase;
-      if (stream) {
-        writeNdjson(res, { type: "final", ok: true, sessionId, reply: finalReply, cta: CTA, meta });
-        res.end();
-      } else {
-        res.json({ ok: true, sessionId, reply: finalReply, cta: CTA, meta });
+  if (!usedKb && specificity.forceKb) {
+    try {
+      const queryEmbedding = await embedText(message);
+      const docs = await retrieveKb(queryEmbedding, {
+        matchCount: MATCH_COUNT + 2,
+        minSimilarity: null,
+      });
+      if (docs.length) {
+        usedKb = true;
+        chunkTags = collectChunkTags(docs);
+        kbContext = buildContext(docs);
       }
-    };
-
-    if (intent.leadCapture) {
-      return sendReply(LEAD_CAPTURE_LINE, { meta: { usedKb: false, chunks: [] } });
+    } catch (error) {
+      console.error("[rag] secondary retrieval failed:", {
+        message: error?.message,
+        details: error?.details ?? error?.detail,
+        hint: error?.hint,
+        code: error?.code,
+      });
     }
+  }
 
-    if (intent.redirect) {
-      return sendReply(buildRedirectReply(), { meta: { usedKb: false, chunks: [] } });
-    }
+  const recent = await recentPromise;
+  const userQuestionCount = recent.filter((m) => m.role === "user").length;
+  const lead = detectLeadSignals(message);
+  let leadScore = lead.score;
+  let leadSignals = [...lead.signals];
 
-    if (intent.allowRag && !usedKb) {
-      return sendReply(noContextReply(), { meta: { usedKb: false, chunks: [] } });
-    }
+  if (userQuestionCount >= 3) {
+    leadScore += 2;
+    leadSignals = Array.from(new Set([...leadSignals, "multi_question"]));
+  }
 
-    const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
-      ...(sessionGoal
-        ? [
-            {
-              role: "system",
-              content: `Known user goal: ${sessionGoal}. Keep answers brief and avoid repeating it.`,
-            },
-          ]
-        : []),
-      ...(factsContext ? [{ role: "system", content: `Site facts:\n${factsContext}` }] : []),
-      ...(kbContext
-        ? [
-            { role: "system", content: `Context snippets:\n${kbContext}` },
-            {
-              role: "system",
-              content:
-                "Use the KB context only for what's included/not included, process, timeline/response time, pricing, or privacy. Paraphrase and stay concise.",
-            },
-          ]
-        : []),
-      ...recent.map((m) => ({ role: m.role, content: m.content })),
-    ];
-
-    const completionArgs = {
-      model: env.OPENAI_MODEL,
-      messages,
-      max_completion_tokens: MAX_CHAT_TOKENS,
-      temperature: 0.3,
-    };
-
-    if (stream) {
-      let fullReply = "";
-      try {
-        const streamResp = await openai.chat.completions.create({
-          ...completionArgs,
-          stream: true,
+  if (leadScore >= 3) {
+    console.log("[lead] lead candidate", { sessionId, leadScore, leadSignals, fields: lead.fields });
+    markSessionLead(sessionId, { score: leadScore, signals: leadSignals })
+      .then(async ({ becameLeadNow }) => {
+        if (!becameLeadNow) return;
+        const sent = await sendLeadAlertEmail({
+          sessionId,
+          score: leadScore,
+          signals: leadSignals,
+          fields: lead.fields,
+          preview: message.slice(0, 280),
         });
-
-        for await (const part of streamResp) {
-          if (aborted) break;
-          const token = part.choices?.[0]?.delta?.content || "";
-          if (!token) continue;
-          fullReply += token;
-          writeNdjson(res, { type: "token", token });
-        }
-
-        const finalReply = clampReply(fullReply || noContextReply());
-
-        if (!aborted) {
-          await appendMessage(sessionId, "assistant", finalReply);
-          writeNdjson(res, {
-            type: "final",
-            ok: true,
+        if (sent) {
+          await markLeadEmailSent(sessionId);
+        } else {
+          console.warn("[lead-email] send skipped or failed; not marking sent", {
             sessionId,
-            reply: finalReply,
-            cta: CTA,
-            meta: metaBase,
+            leadScore,
           });
         }
-      } catch (error) {
-        console.error("Chat stream error:", error);
-        const detail =
-          process.env.NODE_ENV !== "production" ? error?.message || String(error) : undefined;
-        if (!aborted) {
-          writeNdjson(res, { type: "error", ok: false, error: "Server error", detail });
-        }
-      } finally {
-        if (!aborted) res.end();
-      }
-      return;
+      })
+      .catch((err) => console.error("[lead] mark/email failed", err?.message));
+  }
+
+  const metaBase = { usedKb, chunks: usedKb ? chunkTags : [] };
+  const offerForm = shouldOfferForm(message, specificity);
+
+  const sendReply = async (replyText: string, meta = metaBase) => {
+    let finalReply = normalizeReply(replyText || FALLBACK_REPLY);
+    if (
+      (replyText === FALLBACK_REPLY || finalReply.includes("Here are the basics")) &&
+      specificity.topics.length > 0
+    ) {
+      finalReply = normalizeReply(buildSpecificReply(specificity.topics));
     }
+    if (offerForm && !/review form/i.test(finalReply)) {
+      const spacer = finalReply.endsWith(".") ? " " : ". ";
+      finalReply = `${finalReply}${spacer}If you want to proceed, I can point you to the quick review form.`;
+    }
+    if (aborted) return;
+    await appendMessage(sessionId, "assistant", finalReply);
+    if (stream) {
+      writeNdjson(res, { type: "final", ok: true, sessionId, reply: finalReply, meta });
+      res.end();
+    } else {
+      res.json({ ok: true, sessionId, reply: finalReply, meta });
+    }
+  };
 
+  if (greeting && !specificity.forceKb && specificity.topics.length === 0) {
+    return sendReply(
+      "Hey! I can cover your website rebuild questions—what’s included, pricing, timelines, support, or policies. What should we start with?",
+      { usedKb: false, chunks: [] },
+    );
+  }
+
+  if (!isOnTopic(message, usedKb, specificity)) {
+    return sendReply(OFFTOPIC_REPLY, { usedKb: false, chunks: [] });
+  }
+
+  if (REVIEW_PATTERNS.test(message)) {
+    return sendReply(`${REVIEW_REFUSAL} What business details can I clarify?`, {
+      usedKb: false,
+      chunks: [],
+    });
+  }
+
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: `Baseline business details:\n${BASELINE_CONTEXT}` },
+    ...(kbContext ? [{ role: "system", content: `Context snippets:\n${kbContext}` }] : []),
+    ...recent.map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  const completionArgs = {
+    model: env.OPENAI_MODEL,
+    messages,
+    max_completion_tokens: MAX_CHAT_TOKENS,
+  };
+
+  if (stream) {
+    let fullReply = "";
+    try {
+      const streamResp = await openai.chat.completions.create({
+        ...completionArgs,
+        stream: true,
+      });
+
+      for await (const part of streamResp) {
+        if (aborted) break;
+        const token = part.choices?.[0]?.delta?.content || "";
+        if (!token) continue;
+        fullReply += token;
+        writeNdjson(res, { type: "token", token });
+      }
+
+      let finalReply = normalizeReply(fullReply || FALLBACK_REPLY);
+      if (
+        (fullReply === FALLBACK_REPLY || finalReply.includes("Here are the basics")) &&
+        specificity.topics.length > 0
+      ) {
+        finalReply = normalizeReply(buildSpecificReply(specificity.topics));
+      }
+
+      if (!aborted) {
+        const replyWithForm =
+          offerForm && !/review form/i.test(finalReply)
+            ? `${finalReply}${finalReply.endsWith(".") ? " " : ". "}If you want to proceed, I can point you to the quick review form.`
+            : finalReply;
+        await appendMessage(sessionId, "assistant", replyWithForm);
+        writeNdjson(res, {
+          type: "final",
+          ok: true,
+          sessionId,
+          reply: replyWithForm,
+          meta: metaBase,
+        });
+      }
+    } catch (error) {
+      console.error("Chat stream error:", error);
+      const detail =
+        process.env.NODE_ENV !== "production" ? error?.message || String(error) : undefined;
+      if (!aborted) {
+        writeNdjson(res, { type: "error", ok: false, error: "Server error", detail });
+      }
+    } finally {
+      if (!aborted) res.end();
+    }
+    return;
+  }
+
+  try {
     const completion = await openai.chat.completions.create(completionArgs);
-
-    const rawReply = completion.choices?.[0]?.message?.content?.trim() || noContextReply();
-    const reply = clampReply(rawReply);
+    const rawReply = completion.choices?.[0]?.message?.content?.trim() || FALLBACK_REPLY;
+    let reply = normalizeReply(rawReply);
+    if (
+      (rawReply === FALLBACK_REPLY || reply.includes("Here are the basics")) &&
+      specificity.topics.length > 0
+    ) {
+      reply = normalizeReply(buildSpecificReply(specificity.topics));
+    }
+    if (offerForm && !/review form/i.test(reply)) {
+      reply = `${reply}${reply.endsWith(".") ? " " : ". "}If you want to proceed, I can point you to the quick review form.`;
+    }
     await appendMessage(sessionId, "assistant", reply);
 
     res.json({
       ok: true,
       sessionId,
       reply,
-      cta: CTA,
       meta: metaBase,
     });
   } catch (err) {
     console.error("Chat error:", err);
-    const detail =
-      process.env.NODE_ENV !== "production" ? err?.message || String(err) : undefined;
+    const detail = process.env.NODE_ENV !== "production" ? err?.message || String(err) : undefined;
     if (stream) {
       if (!aborted) {
         writeNdjson(res, { type: "error", ok: false, error: "Server error", detail });

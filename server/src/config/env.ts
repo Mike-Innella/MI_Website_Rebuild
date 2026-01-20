@@ -30,4 +30,10 @@ export const env = {
   OPENAI_API_KEY: requireEnv("OPENAI_API_KEY"),
   OPENAI_MODEL: optionalEnv("OPENAI_MODEL", "gpt-4o-mini"),
   OPENAI_EMBED_MODEL: optionalEnv("OPENAI_EMBED_MODEL", "text-embedding-3-small"),
+  LEAD_ALERT_EMAIL: optionalEnv("LEAD_ALERT_EMAIL", ""),
+  SMTP_HOST: optionalEnv("SMTP_HOST", ""),
+  SMTP_PORT: optionalEnv("SMTP_PORT", "587"),
+  SMTP_USER: optionalEnv("SMTP_USER", ""),
+  SMTP_PASS: optionalEnv("SMTP_PASS", ""),
+  EMAIL_FROM: optionalEnv("EMAIL_FROM", ""),
 };

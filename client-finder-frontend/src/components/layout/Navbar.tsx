@@ -54,14 +54,14 @@ export default function Navbar() {
         const visible = entries.filter((entry) => entry.isIntersecting);
         if (!visible.length) return;
         const mostVisible = visible.sort(
-          (a, b) => b.intersectionRatio - a.intersectionRatio
+          (a, b) => b.intersectionRatio - a.intersectionRatio,
         )[0];
         setActiveSection(mostVisible.target.id);
       },
       {
         rootMargin: "-40% 0px -50% 0px",
         threshold: [0.2, 0.5, 0.8],
-      }
+      },
     );
 
     elements.forEach((el) => observer.observe(el));
@@ -83,10 +83,19 @@ export default function Navbar() {
     >
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ py: 1 }}>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0 }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{ flexShrink: 0, gap: 2 }}
+          >
             <Box sx={{ display: "flex", alignItems: "center" }}>
               <Image
-                src={mode === "light" ? "/assets/MILogo_dark.png" : "/assets/MILogo.png"}
+                src={
+                  mode === "light"
+                    ? "/assets/MILogo_dark.png"
+                    : "/assets/MILogo.png"
+                }
                 alt="MI Website Rebuilds logo"
                 width={48}
                 height={48}
@@ -108,7 +117,12 @@ export default function Navbar() {
               direction="row"
               spacing={1}
               alignItems="center"
-              sx={{ ml: { md: 2 }, flex: 1, justifyContent: "flex-end" }}
+              sx={{
+                ml: { md: 2 },
+                mr: { md: 2 },
+                flex: 1,
+                justifyContent: "flex-end",
+              }}
             >
               {navLinks.map((link) => (
                 <Button
@@ -117,21 +131,24 @@ export default function Navbar() {
                   onClick={() => scrollToId(link.id)}
                   sx={{
                     borderBottom: "2px solid",
-                borderColor:
-                  activeSection === link.id ? "primary.main" : "transparent",
-                color:
-                  activeSection === link.id
-                    ? "primary.main"
-                    : "text.primary",
-                borderRadius: "var(--radius-pill)",
-                width: navPillWidth,
-                minWidth: navPillWidth,
-                justifyContent: "center",
-                fontSize: "0.9rem",
-                fontWeight: 600,
-                py: 0.9,
-                px: 1.25,
-              }}
+                    borderColor:
+                      activeSection === link.id
+                        ? "primary.main"
+                        : "transparent",
+                    color:
+                      activeSection === link.id
+                        ? "primary.main"
+                        : "text.primary",
+                    borderRadius: "var(--radius-pill)",
+                    width: navPillWidth,
+                    minWidth: navPillWidth,
+                    justifyContent: "center",
+                    fontSize: "0.9rem",
+                    fontWeight: 600,
+                    py: 0.9,
+                    px: 1.25,
+                    marginRight: "16px",
+                  }}
                 >
                   {link.label}
                 </Button>
@@ -139,7 +156,12 @@ export default function Navbar() {
             </Stack>
           )}
 
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ ml: { xs: "auto", md: 0 }, flexShrink: 0, gap: 2 }}
+          >
             {!isMobile && (
               <Button
                 variant="contained"
@@ -149,7 +171,7 @@ export default function Navbar() {
                   minWidth: navPillWidth,
                   justifyContent: "center",
                   fontSize: "0.9rem",
-                  fontWeight: 700,
+                  fontWeight: "700",
                 }}
               >
                 Request a Review
@@ -175,7 +197,11 @@ export default function Navbar() {
                 borderRadius: 2,
               }}
             >
-              {mode === "dark" ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
+              {mode === "dark" ? (
+                <LightModeOutlinedIcon />
+              ) : (
+                <DarkModeOutlinedIcon />
+              )}
             </IconButton>
           </Stack>
         </Toolbar>

@@ -14,8 +14,7 @@
     "test:all": "DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/test_all.ts",
     "embed": "DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/embed_kb_docs.ts",
     "seed:kb": "DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/seed_kb_docs_from_site.ts",
-    "seed:facts": "DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/seed_assistant_facts.ts",
-    "seed:all": "DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/seed_kb_docs_from_site.ts && DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/seed_assistant_facts.ts"
+    "seed:all": "DOTENV_CONFIG_PATH=.env.local NODE_ENV=development tsx src/scripts/seed_kb_docs_from_site.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.1",
@@ -23,6 +22,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.1.0",
+    "nodemailer": "^6.9.15",
     "openai": "^6.16.0",
     "pg": "^8.17.1",
     "postgres": "^3.4.8",
