@@ -5,7 +5,7 @@ import Grid from "@mui/material/Grid";
 import { useTheme } from "@mui/material/styles";
 import Section from "@/components/layout/Section";
 import { maxHeroWidth, sectionGap } from "@/lib/layoutTokens";
-import { cardPad, secondarySurface } from "@/lib/uiStyles";
+import { cardPadTight, secondarySurface } from "@/lib/uiStyles";
 
 const offerPoints = [
   "Designed to showcase your work clearly",
@@ -21,10 +21,23 @@ export default function ProblemSolutionSection() {
     <Section
       id="offer-single"
       eyebrow="For Creators & Independent Professionals"
-      title="Single-Page Sites for Clear, Professional Credibility"
-      subtitle="A clean, fast site that shows what you do and makes you easy to trust."
+      title="Lightweight option (for simple needs)"
+      subtitle={
+        <>
+          <Box component="span" sx={{ display: "block" }}>
+            If you don’t need a full rebuild, this is a faster, simpler alternative.
+          </Box>
+          <Box component="span" sx={{ display: "block" }}>
+            A clean, fast site that shows what you do and makes you easy to trust.
+          </Box>
+        </>
+      }
       variant="tinted"
       disableSpine
+      sx={{
+        "& h2.MuiTypography-h3": { fontSize: { xs: "1.9rem", md: "2.2rem" } },
+        py: { xs: 8, md: 10 },
+      }}
     >
       <Grid container spacing={sectionGap} alignItems="stretch" sx={{ maxWidth: maxHeroWidth, mx: "auto" }}>
         <Grid size={{ xs: 12, md: 7 }}>
@@ -35,9 +48,12 @@ export default function ProblemSolutionSection() {
               borderRadius: "var(--radius-card)",
               ...secondarySurface,
               height: "100%",
+              boxShadow: "none",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
-            <CardContent sx={{ p: cardPad }}>
+            <CardContent sx={{ p: cardPadTight }}>
               <Stack spacing={2.5}>
                 <Typography variant="subtitle1" color="primary" sx={{ letterSpacing: "0.05em" }}>
                   What you get
@@ -94,9 +110,12 @@ export default function ProblemSolutionSection() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
+              boxShadow: "none",
+              border: "1px solid",
+              borderColor: "divider",
             }}
           >
-            <CardContent sx={{ p: cardPad, display: "grid", gap: 2.5 }}>
+            <CardContent sx={{ p: cardPadTight, display: "grid", gap: 2.25 }}>
               <Box>
                 <Typography variant="subtitle1" color="text.secondary">
                   Delivery
@@ -112,22 +131,15 @@ export default function ProblemSolutionSection() {
                 <Typography variant="h5" sx={{ mt: 0.5, fontWeight: 800 }}>
                   Starting at $500
                 </Typography>
-                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                  Clear scope for a credible single-page site.
+                <Typography color="text.secondary" sx={{ mt: 0.75 }}>
+                  Best for personal brands or simple credibility pages — not lead-heavy businesses.
                 </Typography>
                 <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-                  Best fit if you need a professional presence — not a complex site.
+                  Not recommended if your goal is consistent inbound leads.
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  const el = document.getElementById("cta");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-              >
-                Request a Review (Recorded)
+              <Button variant="text" size="medium" component="a" href="#review" sx={{ justifyContent: "flex-start" }}>
+                Request 5-minute review
               </Button>
             </CardContent>
           </Card>

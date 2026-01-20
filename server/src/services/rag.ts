@@ -1,5 +1,12 @@
 import { createServerSupabase } from "./supabase.js";
 
+type RetrieveOptions = {
+  matchCount?: number;
+  minSimilarity?: number | null;
+  tags?: string[] | null;
+  source?: string | null;
+};
+
 function getMinSimilarity() {
   const raw = process.env.RAG_MIN_SIMILARITY;
   if (raw == null || String(raw).trim() === "") return -1.0;
@@ -18,17 +25,21 @@ function pickSimilarity(r) {
  * Retrieves KB chunks via the ONLY supported RPC: public.match_kb_chunks
  * Expected RPC fields (per your DB): chunk_id, doc_id, chunk_index, title, chunk_text, chunk_title, tags, source, similarity
  */
-export async function retrieveKb(queryEmbedding, k = 6) {
-  const matchCount = Math.max(1, Math.min(20, Number(k) || 6));
-  const minSimilarity = getMinSimilarity();
+export async function retrieveKb(queryEmbedding, options: RetrieveOptions = {}) {
+  const matchCount = Math.max(1, Math.min(20, Number(options.matchCount ?? 6) || 6));
+  const minSimilarity =
+    options.minSimilarity === undefined ? getMinSimilarity() : options.minSimilarity;
   const supabase = createServerSupabase();
+
+  const filterTags =
+    Array.isArray(options.tags) && options.tags.length ? options.tags : null;
 
   const { data, error } = await supabase.rpc("match_kb_chunks", {
     query_embedding: queryEmbedding,
     match_count: matchCount,
     min_similarity: minSimilarity,
-    filter_source: null,
-    filter_tags: null,
+    filter_source: options.source ?? null,
+    filter_tags: filterTags,
   });
 
   if (error) throw error;
@@ -51,7 +62,7 @@ export async function retrieveKb(queryEmbedding, k = 6) {
         similarity: similarity ?? -1,
       };
     })
-    .filter((r) => (applyCutoff ? r.similarity >= minSimilarity : true));
+    .filter((r) => (applyCutoff ? r.similarity >= (minSimilarity ?? -1) : true));
 }
 
 /**
@@ -61,19 +72,22 @@ export function buildContext(items) {
   const rows = Array.isArray(items) ? items : [];
   if (!rows.length) return "";
 
-  const maxItems = Math.min(8, rows.length);
+  const maxItems = Math.min(4, rows.length);
+
+  const toSentences = (text: string) => {
+    const clean = String(text || "").replace(/\s+/g, " ").trim();
+    if (!clean) return "";
+    const sentences = clean.match(/[^.!?]+[.!?]?/g) || [clean];
+    const summary = sentences.slice(0, 2).join(" ").trim();
+    return summary.length > 360 ? `${summary.slice(0, 357)}...` : summary;
+  };
 
   return rows
     .slice(0, maxItems)
-    .map((r, i) => {
+    .map((r) => {
       const title = String(r.title || "Untitled").trim();
-      const sim = typeof r.similarity === "number" ? r.similarity.toFixed(3) : "n/a";
-      const text = String(r.body || "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 600);
-
-      return `[#${i + 1} | sim=${sim}] ${title}\n${text}`;
+      const snippet = toSentences(r.body);
+      return `${title}: ${snippet}`;
     })
-    .join("\n\n---\n\n");
+    .join("\n\n");
 }

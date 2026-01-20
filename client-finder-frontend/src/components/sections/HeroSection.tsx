@@ -16,20 +16,20 @@ const heroOptions = [
   {
     title: "My site needs credibility",
     caption: "You want it to look professional and trustworthy.",
-    targetId: "cta",
-    cta: "Request a Review (Recorded)",
+    targetId: "review",
+    cta: "Request 5-minute review",
   },
   {
     title: "My site isn’t getting inquiries",
     caption: "You want more people to contact you.",
-    targetId: "cta",
-    cta: "Request a Review (Recorded)",
+    targetId: "review",
+    cta: "Request 5-minute review",
   },
   {
     title: "I’m ready to rebuild",
     caption: "You want a clear plan for the new site before starting.",
-    targetId: "cta",
-    cta: "Request a Review (Recorded)",
+    targetId: "review",
+    cta: "Request 5-minute review",
   },
 ];
 
@@ -110,8 +110,7 @@ export default function HeroSection() {
               className="reveal"
               style={{ "--delay": "80ms" } as any}
             >
-              If your website looks fine but isn’t getting inquiries, this is for you. I record a short review and show
-              exactly what’s blocking conversions.
+              If your site looks fine but isn’t generating inquiries, I’ll show you exactly why — in 5 minutes.
             </Typography>
 
             <Grid
@@ -124,15 +123,12 @@ export default function HeroSection() {
               {heroOptions.map((option) => (
                 <Grid key={option.title} size={{ xs: 12, md: 4 }}>
                   <Paper
-                    role="button"
-                    tabIndex={0}
+                    component="a"
+                    href="#review"
                     aria-label={`${option.title} - ${option.caption}`}
-                    onClick={() => scrollToId(option.targetId)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        scrollToId(option.targetId);
-                      }
+                    onClick={(event) => {
+                      event.preventDefault();
+                      scrollToId(option.targetId);
                     }}
                     sx={{
                       borderRadius: "var(--radius-card)",
@@ -176,6 +172,14 @@ export default function HeroSection() {
                 </Grid>
               ))}
             </Grid>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              className="reveal"
+              style={{ "--delay": "200ms" } as any}
+            >
+              I’ll record a short Loom showing what’s blocking inquiries.
+            </Typography>
           </Stack>
         </Box>
       </Container>

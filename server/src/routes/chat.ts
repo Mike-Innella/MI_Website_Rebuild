@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { z } from "zod";
 import { randomUUID } from "node:crypto";
+import { z } from "zod";
 import { env } from "../config/env.js";
 import { openai } from "../services/openai.js";
 import { embedText } from "../services/embeddings.js";
@@ -13,135 +13,218 @@ import {
 } from "../services/sessions.js";
 import { extractFieldsFromText } from "../services/leadScoring.js";
 import { buildFactsContext, getAssistantFacts } from "../services/assistantFacts.js";
-import { getCachedContext, setCachedContext } from "../services/contextCache.js";
 
 export const chatRouter = Router();
 
 const ChatBody = z.object({
   sessionId: z.string().uuid().optional(),
-  message: z.string().min(1).max(1000),
+  message: z.string().min(1).max(800),
+  pagePath: z.string().max(120).optional(),
   stream: z.boolean().optional(),
 });
 
-const MAX_CHAT_TOKENS = 260;
-
-const FAQ_CHEAT_SHEET = [
-  "7-day timeline: day 1 kickoff, days 2-4 design + copy, days 5-6 build + QA, day 7 launch with analytics + SEO.",
-  "What's included: refreshed design, conversion-focused copy, mobile/responsive polish, speed/SEO tuning, analytics + lead tracking, and launch support.",
-  "Pricing: flat project rate (no retainer); scope includes design, copy, build, speed/SEO, analytics, launch support.",
-  "Getting started: share business name, website URL, and best email; we review, confirm scope, and lock your 7-day slot.",
-  "Tech stack: do not mention; focus on benefits and outcomes.",
-].join(" | ");
-
-const faqFallbacks: { test: RegExp; reply: string }[] = [
-  {
-    test: /how fast|timeline|speed|turnaround/i,
-    reply: "We rebuild and relaunch in 7 days: day 1 kickoff, days 2-4 design + copy, days 5-6 build + QA, day 7 launch with analytics and SEO in place.",
-  },
-  {
-    test: /pricing|cost|charge/i,
-    reply: "Flat project rate with no retainers. You get design, copy, build, speed/SEO tuning, analytics, and launch support. Share your site and goals and I'll confirm scope.",
-  },
-  {
-    test: /what'?s included|include|deliverable|scope/i,
-    reply: "Included: refreshed design, conversion-focused copy, mobile and speed tuning, on-page SEO, analytics + lead tracking, and launch support. One-week turnaround.",
-  },
-  {
-    test: /how do i start|get started|begin|next step/i,
-    reply: "Share your business name, website URL, and best email and I'll review your site, confirm scope, and lock your 7-day slot.",
-  },
-];
-
+const CTA = { label: "Request 5-minute review", href: "#contact" };
+const CTA_LINE = "Want to request the 5-minute review?";
+const LEAD_CAPTURE_LINE =
+  "Perfect - the form takes ~30 seconds. Drop your site URL and I'll send the review.";
+const MAX_CHAT_TOKENS = 160;
+const MIN_SIMILARITY = 0.78;
+const MATCH_COUNT = 4;
 const GOALS = ["more calls", "more leads", "more sales"];
 
-function pickFaqFallback(message) {
-  const hit = faqFallbacks.find(({ test }) => test.test(message));
-  return hit?.reply || null;
-}
+const REDIRECT_PATTERNS = [
+  /can you build an app/i,
+  /\bseo\b/i,
+  /\bads?\b/i,
+  /\blogo\b/i,
+  /\bbranding\b/i,
+  /what stack/i,
+  /\breact\b/i,
+];
 
-function leadIntentFromFields(fields) {
-  const hasWebsite = Boolean(fields.websiteUrl);
-  const hasEmail = Boolean(fields.email);
-  const hasBusiness = Boolean(fields.businessName);
-  if (hasWebsite && hasEmail && hasBusiness) return "ready_to_submit";
-  if (!hasEmail) return "collect_email";
-  if (!hasWebsite) return "collect_website";
-  if (!hasBusiness) return "collect_business";
-  return "qualify";
-}
+const ALLOW_RAG_PATTERNS = [
+  /price|cost|how much|pricing/i,
+  /timeline|turnaround|response time|how fast/i,
+  /include|included|not included|scope|deliverable/i,
+  /privacy|data policy|gdpr/i,
+  /review|loom/i,
+  /process|steps?/i,
+];
 
-function shouldSkipRag(message) {
-  const wordCount = message.split(/\s+/).filter(Boolean).length;
-  // Only skip for empty inputs; otherwise always retrieve KB for better answers.
-  return wordCount === 0 && message.length === 0;
-}
+const LEAD_CAPTURE_PATTERNS = [
+  /\byes\b|\bsure\b|\bsounds good\b|\blet'?s go\b|\bdo it\b|\bsend it\b/i,
+  /how do i start/i,
+  /where'?s the form/i,
+  /can you look at my site/i,
+];
+
+const TAG_RULES = [
+  { tag: "site:pricing", test: /price|cost|pricing|how much/i },
+  { tag: "site:process", test: /process|timeline|turnaround|response time|how fast/i },
+  { tag: "site:privacy", test: /privacy|data policy|gdpr/i },
+  { tag: "site:offer", test: /include|included|not included|deliverable|scope/i },
+  { tag: "site:cta", test: /review|loom|form|cta/i },
+];
+
+const SYSTEM_PROMPT = [
+  "You are Relay, a small assistant on a website that offers a 5-minute website review.",
+  "Your job is to reduce friction and guide the visitor to request the 5-minute review.",
+  "Rules (must follow):",
+  "- Keep responses under 60 words.",
+  "- Use at most 1 short paragraph OR 2 short paragraphs.",
+  "- One idea per reply; stay focused.",
+  "- No bullet lists unless explicitly asked.",
+  "- Do NOT explain multiple service options or compare tiers.",
+  "- Do NOT negotiate pricing or timelines beyond what the site already states.",
+  "- If the user asks anything outside: review, process, included/not included, privacy, timeline, or fit -> redirect to the 5-minute review form.",
+  "- Always re-anchor to the 5-minute review with a gentle CTA (or one clarifying question if absolutely required).",
+  "- If you use provided context, paraphrase it briefly; do not quote large sections.",
+].join("\n");
 
 function writeNdjson(res, payload) {
   res.write(`${JSON.stringify(payload)}\n`);
 }
 
-function replaceVagueReply(reply: string, message: string) {
+function ensureCta(reply: string, ctaLine = CTA_LINE) {
   const trimmed = String(reply || "").trim();
-  const tooVague =
-    trimmed.length < 25 ||
-    /share.*detail|elaborate|more detail|hard to say|it depends/i.test(trimmed);
+  if (!trimmed) return "";
+  const lower = trimmed.toLowerCase();
+  const hasReview = lower.includes("review");
+  const hasAsk = lower.includes("request") || lower.includes("form");
+  if (hasReview && hasAsk) return trimmed;
+  const spacer = trimmed.endsWith(".") || trimmed.endsWith("?") ? " " : ". ";
+  return `${trimmed}${spacer}${ctaLine}`;
+}
 
-  if (!tooVague) return trimmed;
+function clampReply(reply: string, ctaLine = CTA_LINE) {
+  const normalized = String(reply || "").replace(/\s+/g, " ").trim();
+  if (!normalized) return "";
+  const sentences = normalized.match(/[^.!?]+[.!?]?/g) || [normalized];
+  const limited = sentences.slice(0, 2).join(" ").trim();
+  const capped =
+    limited.length > 420 ? `${limited.slice(0, 400).trim().replace(/[.!?]*$/, "")}.` : limited;
+  return ensureCta(capped, ctaLine);
+}
 
-  const faq = pickFaqFallback(message);
-  if (faq) return faq;
+function buildRedirectReply() {
+  return "I can help with that, but the fastest first step is the 5-minute review so you know what to fix first. Want to request it now?";
+}
 
-  return "I can help - what's your website URL and what's the #1 goal (more calls, more leads, or more sales)?";
+function noContextReply() {
+  return "I can cover that in a quick 5-minute review and point to the fixes that matter most. Want to request it?";
+}
+
+function detectTags(message: string) {
+  const lower = String(message || "");
+  const matches = TAG_RULES.filter(({ test }) => test.test(lower)).map(({ tag }) => tag);
+  return Array.from(new Set(matches));
+}
+
+function classifyIntent(message: string, fields: ReturnType<typeof extractFieldsFromText>) {
+  const allowRag = ALLOW_RAG_PATTERNS.some((regex) => regex.test(message));
+  const leadCapture =
+    LEAD_CAPTURE_PATTERNS.some((regex) => regex.test(message)) || Boolean(fields.websiteUrl);
+  const redirect = REDIRECT_PATTERNS.some((regex) => regex.test(message)) || (!allowRag && !leadCapture);
+  return {
+    allowRag,
+    leadCapture,
+    redirect,
+    tags: allowRag ? detectTags(message) : [],
+  };
+}
+
+function collectChunkTags(docs) {
+  const tags = docs
+    .flatMap((doc) => (Array.isArray(doc.tags) ? doc.tags : []))
+    .filter((tag) => typeof tag === "string");
+  return Array.from(new Set(tags));
 }
 
 chatRouter.post("/chat", async (req, res) => {
   const parsed = ChatBody.safeParse(req.body);
   if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid input" });
+    return res.status(400).json({ ok: false, error: "Invalid input" });
   }
 
   const sessionId = parsed.data.sessionId || randomUUID();
   const message = parsed.data.message.trim();
   const messageLower = message.toLowerCase();
   const stream = Boolean(parsed.data.stream);
+
   let sessionGoal: string | null = null;
 
   try {
-    try {
-      const session = await getOrCreateSession(sessionId);
+    const session = await getOrCreateSession(sessionId);
 
-      const detectedGoal = GOALS.find((g) => messageLower.includes(g)) || null;
-      const resolvedGoal = detectedGoal || session.goal || null;
+    const detectedGoal = GOALS.find((g) => messageLower.includes(g)) || null;
+    const resolvedGoal = detectedGoal || session.goal || null;
 
-      if (detectedGoal && detectedGoal !== session.goal) {
-        await upsertChatSession(sessionId, { goal: detectedGoal });
-      }
-      sessionGoal = resolvedGoal;
-    } catch (error) {
-      console.error("[chat_sessions] query failed:", {
-        message: error?.message,
-        details: error?.details ?? error?.detail,
-        hint: error?.hint,
-        code: error?.code,
-      });
-      throw error;
+    if (detectedGoal && detectedGoal !== session.goal) {
+      await upsertChatSession(sessionId, { goal: detectedGoal });
     }
+    sessionGoal = resolvedGoal;
+  } catch (error) {
+    console.error("[chat_sessions] query failed:", {
+      message: error?.message,
+      details: error?.details ?? error?.detail,
+      hint: error?.hint,
+      code: error?.code,
+    });
+    return res.status(500).json({ ok: false, error: "Server error" });
+  }
+
+  let aborted = false;
+  if (stream) {
+    res.setHeader("Content-Type", "application/x-ndjson");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders?.();
+    req.on("close", () => {
+      aborted = true;
+    });
+  }
+
+  try {
     await appendMessage(sessionId, "user", message);
 
-    const factsPromise = getAssistantFacts(18);
+    const fields = extractFieldsFromText(message);
+    const intent = classifyIntent(messageLower, fields);
+
+    const factsPromise = getAssistantFacts(12);
     const recentPromise = getRecentMessages(sessionId, 8);
 
     let docs = [];
-    if (!shouldSkipRag(message)) {
-      const queryEmbedding = await embedText(message);
-      docs = await retrieveKb(queryEmbedding, 8);
+    let kbContext = "";
+    let usedKb = false;
+    let chunkTags = [];
+
+    if (intent.allowRag) {
+      try {
+        const queryEmbedding = await embedText(message);
+        docs = await retrieveKb(queryEmbedding, {
+          matchCount: MATCH_COUNT,
+          minSimilarity: MIN_SIMILARITY,
+          tags: intent.tags,
+        });
+        if (docs.length) {
+          usedKb = true;
+          chunkTags = collectChunkTags(docs);
+          kbContext = buildContext(docs);
+        }
+      } catch (error) {
+        console.error("[rag] retrieval failed:", {
+          message: error?.message,
+          details: error?.details ?? error?.detail,
+          hint: error?.hint,
+          code: error?.code,
+        });
+      }
     }
 
-    const context = buildContext(docs);
-
-    let facts = [];
+    let factsContext = "";
     try {
-      facts = await factsPromise;
+      const facts = await factsPromise;
+      factsContext = buildFactsContext(facts);
     } catch (error) {
       console.error("[assistant_facts] query failed:", {
         message: error?.message,
@@ -150,50 +233,53 @@ chatRouter.post("/chat", async (req, res) => {
         code: error?.code,
       });
     }
-    const factsContext = buildFactsContext(facts);
 
     const recent = await recentPromise;
+    const metaBase = { usedKb, chunks: usedKb ? chunkTags : [] };
 
-    const system = [
-      "You are Relay, the on-site assistant for a website rebuild offer.",
-      "Be specific, helpful, and non-repetitive.",
-      "Rules:",
-      "- Answer the user's question FIRST.",
-      "- Use at least 1 concrete detail from Site facts OR Knowledge base context in every answer. If none are available, say you don't have that detail. Only use the FAQ quick answers when the question is about pricing, timeline, what's included, or how to start.",
-      "- Do NOT repeat the same CTA or sentence in back-to-back replies.",
-      "- Ask a question ONLY when it's needed to move forward (max 1).",
-      "- Keep it concise but complete (80-140 words).",
-      "- Never mention tech stack or implementation details.",
-      "- If the user's question is a rephrase of a previous question in this session, do NOT repeat the same answer. Instead, add NEW information or explain what affects the answer.",
-      "- Only ask for missing information. If the user's goal is already known, do NOT ask for it again.",
-      `FAQ quick answers: ${FAQ_CHEAT_SHEET}`,
-    ].join("\n");
+    const sendReply = async (replyText: string, options: { meta?: any; ctaLine?: string } = {}) => {
+      const finalReply = clampReply(replyText, options.ctaLine ?? CTA_LINE);
+      if (aborted) return;
+      await appendMessage(sessionId, "assistant", finalReply);
+      const meta = options.meta ?? metaBase;
+      if (stream) {
+        writeNdjson(res, { type: "final", ok: true, sessionId, reply: finalReply, cta: CTA, meta });
+        res.end();
+      } else {
+        res.json({ ok: true, sessionId, reply: finalReply, cta: CTA, meta });
+      }
+    };
+
+    if (intent.leadCapture) {
+      return sendReply(LEAD_CAPTURE_LINE, { meta: { usedKb: false, chunks: [] } });
+    }
+
+    if (intent.redirect) {
+      return sendReply(buildRedirectReply(), { meta: { usedKb: false, chunks: [] } });
+    }
+
+    if (intent.allowRag && !usedKb) {
+      return sendReply(noContextReply(), { meta: { usedKb: false, chunks: [] } });
+    }
 
     const messages = [
-      { role: "system", content: system },
+      { role: "system", content: SYSTEM_PROMPT },
       ...(sessionGoal
         ? [
             {
               role: "system",
-              content: `Known user goal for this session: ${sessionGoal}. Do not ask for it again; focus on the website URL or other missing details.`,
+              content: `Known user goal: ${sessionGoal}. Keep answers brief and avoid repeating it.`,
             },
           ]
         : []),
-      ...(factsContext
+      ...(factsContext ? [{ role: "system", content: `Site facts:\n${factsContext}` }] : []),
+      ...(kbContext
         ? [
-            { role: "system", content: `Site facts:\n${factsContext}` },
+            { role: "system", content: `Context snippets:\n${kbContext}` },
             {
               role: "system",
-              content: "Use the Site facts above as the source of truth when it applies.",
-            },
-          ]
-        : []),
-      ...(context
-        ? [
-            { role: "system", content: `Knowledge base context:\n${context}` },
-            {
-              role: "system",
-              content: "Use the KB context above as the source of truth when it applies. Prefer it over generic advice.",
+              content:
+                "Use the KB context only for what's included/not included, process, timeline/response time, pricing, or privacy. Paraphrase and stay concise.",
             },
           ]
         : []),
@@ -204,20 +290,11 @@ chatRouter.post("/chat", async (req, res) => {
       model: env.OPENAI_MODEL,
       messages,
       max_completion_tokens: MAX_CHAT_TOKENS,
+      temperature: 0.3,
     };
 
     if (stream) {
-      res.setHeader("Content-Type", "application/x-ndjson");
-      res.setHeader("Cache-Control", "no-cache, no-transform");
-      res.setHeader("Connection", "keep-alive");
-      res.flushHeaders?.();
-
       let fullReply = "";
-      let aborted = false;
-      req.on("close", () => {
-        aborted = true;
-      });
-
       try {
         const streamResp = await openai.chat.completions.create({
           ...completionArgs,
@@ -232,29 +309,17 @@ chatRouter.post("/chat", async (req, res) => {
           writeNdjson(res, { type: "token", token });
         }
 
-        const faqFallback = pickFaqFallback(message);
-        const finalReply = fullReply.trim() || faqFallback || "Could you share a bit more detail?";
-        const usableReply = replaceVagueReply(finalReply, message);
-        if (!aborted) {
-          await appendMessage(sessionId, "assistant", usableReply);
-        }
-
-        const extracted = extractFieldsFromText(
-          recent.map((m) => m.content).join("\n") + "\n" + message + "\n" + usableReply,
-        );
-        const suggestedFields = Object.fromEntries(
-          Object.entries(extracted).filter(([, v]) => Boolean(v)),
-        );
-        const leadIntent = leadIntentFromFields(extracted);
+        const finalReply = clampReply(fullReply || noContextReply());
 
         if (!aborted) {
+          await appendMessage(sessionId, "assistant", finalReply);
           writeNdjson(res, {
             type: "final",
+            ok: true,
             sessionId,
-            reply: usableReply,
-            suggestedFields,
-            leadIntent,
-            retrieved: docs.map((d) => ({ title: d.title, similarity: d.similarity })).slice(0, 3),
+            reply: finalReply,
+            cta: CTA,
+            meta: metaBase,
           });
         }
       } catch (error) {
@@ -262,7 +327,7 @@ chatRouter.post("/chat", async (req, res) => {
         const detail =
           process.env.NODE_ENV !== "production" ? error?.message || String(error) : undefined;
         if (!aborted) {
-          writeNdjson(res, { type: "error", error: "Server error", detail });
+          writeNdjson(res, { type: "error", ok: false, error: "Server error", detail });
         }
       } finally {
         if (!aborted) res.end();
@@ -272,34 +337,28 @@ chatRouter.post("/chat", async (req, res) => {
 
     const completion = await openai.chat.completions.create(completionArgs);
 
-    const faqFallback = pickFaqFallback(message);
-
-    const rawReply =
-      completion.choices?.[0]?.message?.content?.trim() || faqFallback || "Could you share a bit more detail?";
-    const reply = replaceVagueReply(rawReply, message);
+    const rawReply = completion.choices?.[0]?.message?.content?.trim() || noContextReply();
+    const reply = clampReply(rawReply);
     await appendMessage(sessionId, "assistant", reply);
 
-    const extracted = extractFieldsFromText(
-      recent.map((m) => m.content).join("\n") + "\n" + message + "\n" + reply,
-    );
-
-    const suggestedFields = Object.fromEntries(
-      Object.entries(extracted).filter(([, v]) => Boolean(v)),
-    );
-
-    const leadIntent = leadIntentFromFields(extracted);
-
     res.json({
+      ok: true,
       sessionId,
       reply,
-      suggestedFields,
-      leadIntent,
-      retrieved: docs.map((d) => ({ title: d.title, similarity: d.similarity })).slice(0, 3),
+      cta: CTA,
+      meta: metaBase,
     });
   } catch (err) {
     console.error("Chat error:", err);
     const detail =
       process.env.NODE_ENV !== "production" ? err?.message || String(err) : undefined;
-    res.status(500).json({ error: "Server error", detail });
+    if (stream) {
+      if (!aborted) {
+        writeNdjson(res, { type: "error", ok: false, error: "Server error", detail });
+        res.end();
+      }
+      return;
+    }
+    res.status(500).json({ ok: false, error: "Server error", detail });
   }
 });

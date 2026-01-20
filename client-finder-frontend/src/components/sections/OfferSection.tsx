@@ -30,7 +30,16 @@ export default function OfferSection() {
       id="offer-business"
       eyebrow="For Small Businesses"
       title="5-Page Business Websites Built to Drive Inquiries"
-      subtitle={<Box component="span" sx={{ fontWeight: 800, color: "text.primary" }}>The primary offer for businesses that need more inquiries fast.</Box>}
+      subtitle={
+        <>
+          <Box component="span" sx={{ display: "block", fontWeight: 800, color: "text.primary" }}>
+            This is the primary option for businesses that need more inquiries.
+          </Box>
+          <Box component="span" sx={{ display: "block", color: "text.secondary" }}>
+            A fast rebuild that makes your offer clearer, more credible, and easier to contact.
+          </Box>
+        </>
+      }
       variant="paper"
       disableSpine
       sx={{
@@ -47,7 +56,10 @@ export default function OfferSection() {
         alignItems="stretch"
         sx={{ maxWidth: maxHeroWidth, mx: "auto" }}
       >
-        <Grid size={{ xs: 12, md: 7 }} sx={{ display: "flex" }}>
+        <Grid
+          size={{ xs: 12, md: 7 }}
+          sx={{ display: "flex", position: "relative", zIndex: { xs: 2, md: 3 } }}
+        >
           <Card
             className="reveal"
             style={{ "--delay": "60ms" } as any}
@@ -56,13 +68,15 @@ export default function OfferSection() {
               borderRadius: "var(--radius-card)",
               ...secondarySurface,
               minHeight: { xs: "auto", md: 520 },
+              position: "relative",
+              zIndex: { xs: 1, md: 2 },
             }}
           >
             <CardContent
               sx={{
                 p: cardPad,
                 display: "grid",
-                gap: 2.5,
+                gap: { xs: 2.75, md: 3 },
               }}
             >
               <Box
@@ -77,21 +91,21 @@ export default function OfferSection() {
                 }}
                 >
                   <Typography variant="h6" sx={{ mb: 1 }}>
-                    Pain-first framing
+                    Why most small business websites don’t convert
                   </Typography>
                   <Typography color="text.secondary">
-                    Most small business websites look fine — but fail to convert.
+                    Most small business websites look “good” — but fail to generate calls, bookings, or leads.
                   </Typography>
                   <Typography color="text.secondary" sx={{ mt: 1.5 }}>
-                    They’re slow, unclear, outdated, or don’t explain why someone should call you.
+                    A website isn’t a brochure. It’s a sales tool. If it doesn’t clearly guide visitors to take action, it’s costing you customers.
                   </Typography>
                 </Box>
 
               <Box>
-                <Typography variant="subtitle1" color="text.secondary" sx={{ letterSpacing: "0.05em", mb: 1 }}>
-                  What changes after rebuild
-                </Typography>
-                <Stack spacing={1.25}>
+                  <Typography variant="subtitle1" color="text.secondary" sx={{ letterSpacing: "0.05em", mb: 1 }}>
+                    What changes after rebuild
+                  </Typography>
+                <Stack spacing={{ xs: 1.35, md: 1.45 }}>
                   {changesAfterRebuild.map((item) => (
                     <Stack key={item} direction="row" spacing={1.5} alignItems="flex-start">
                       <Box
@@ -110,11 +124,11 @@ export default function OfferSection() {
                 </Stack>
               </Box>
 
-              <Box sx={{ mt: 1.5 }}>
+              <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle1" color="text.secondary" sx={{ letterSpacing: "0.05em", mb: 1 }}>
                   Who this is for
                 </Typography>
-                <Stack spacing={1.1}>
+                <Stack spacing={{ xs: 1.2, md: 1.3 }}>
                   {[
                     "You’re ready to make changes in the next 30 days.",
                     "You want clear next steps, not a generic design critique.",
@@ -174,12 +188,18 @@ export default function OfferSection() {
                 <Typography variant="h5" sx={{ mt: 0.75, fontWeight: 800 }}>
                   Typically $1,000–$1,500
                 </Typography>
-                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                  Set pricing floors to pre-qualify serious projects.
-                </Typography>
-                <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-                  Most projects land near the middle of this range.
-                </Typography>
+                  <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                    Set pricing floors to pre-qualify serious projects.
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                    Most projects land near the middle of this range.
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mt: 1.25, fontSize: "0.95rem", opacity: 0.85 }}>
+                    Optional ongoing support — $100/month
+                  </Typography>
+                  <Typography color="text.secondary" sx={{ mt: 0.5, fontSize: "0.95rem", opacity: 0.85 }}>
+                    Covers hosting and small content or text updates.
+                  </Typography>
               </Box>
 
               <Box>
@@ -227,15 +247,8 @@ export default function OfferSection() {
                 </Stack>
               </Box>
 
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  const el = document.getElementById("cta");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-              >
-                Request a Review (Recorded)
+              <Button variant="contained" size="large" component="a" href="#review">
+                Request 5-minute review
               </Button>
             </CardContent>
           </Card>

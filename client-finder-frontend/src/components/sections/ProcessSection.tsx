@@ -9,10 +9,13 @@ import { maxHeroWidth, sectionGap } from "@/lib/layoutTokens";
 import { cardPad, mutedSurface, secondarySurface } from "@/lib/uiStyles";
 
 const steps = [
-  { title: "Free recorded review", detail: "You see exactly what’s holding the site back." },
+  { title: "Recorded 5-minute review", detail: "You see exactly what’s holding the site back." },
   { title: "Scope confirmation", detail: "We agree on the pages and goals before build starts." },
   { title: "Build + review", detail: "I rebuild quickly, then we do one focused review." },
-  { title: "Launch", detail: "We go live once it feels right." },
+  {
+    title: "Step 4 — Launch & support",
+    detail: "Site goes live. Most clients add optional ongoing support so they don’t have to think about hosting or small updates.",
+  },
 ];
 
 export default function ProcessSection() {
@@ -158,16 +161,8 @@ export default function ProcessSection() {
                   </Typography>
                 </Box>
               </Stack>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  const el = document.getElementById("cta");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                sx={{ mt: "auto" }}
-              >
-                Request a Review (Recorded)
+              <Button variant="contained" size="large" component="a" href="#review" sx={{ mt: "auto" }}>
+                Request 5-minute review
               </Button>
             </CardContent>
           </Card>

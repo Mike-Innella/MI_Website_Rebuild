@@ -7,41 +7,54 @@ export default function PageSkeleton() {
       <div className="skel-shell">
         <div className="skel-nav">
           <div className="skel-nav-left">
-            <SkeletonBase variant="circle" style={{ width: 44, height: 44 }} />
-            <SkeletonBase variant="rect" style={{ width: 180, height: 20 }} />
+            <SkeletonBase variant="circle" style={{ width: 48, height: 48 }} />
+            <SkeletonBase variant="rect" style={{ width: 170, height: 18 }} />
           </div>
-          <div className="skel-nav-right">
-            <SkeletonBase variant="rect" style={{ width: 90, height: 32, borderRadius: 999 }} />
-            <SkeletonBase variant="rect" style={{ width: 90, height: 32, borderRadius: 999 }} />
-            <SkeletonBase variant="rect" style={{ width: 110, height: 32, borderRadius: 999 }} />
-            <SkeletonBase variant="rect" style={{ width: 120, height: 36, borderRadius: 999 }} />
+          <div className="skel-nav-links">
+            <SkeletonBase variant="rect" style={{ width: 144, height: 36, borderRadius: 999 }} />
+            <SkeletonBase variant="rect" style={{ width: 144, height: 36, borderRadius: 999 }} />
+          </div>
+          <div className="skel-nav-actions">
+            <SkeletonBase
+              className="skel-hide-mobile"
+              variant="rect"
+              style={{ width: 214, height: 42, borderRadius: 999 }}
+            />
+            <SkeletonBase
+              className="skel-hide-desktop"
+              variant="rect"
+              style={{ width: 38, height: 38, borderRadius: 12 }}
+            />
+            <SkeletonBase variant="circle" style={{ width: 38, height: 38 }} />
           </div>
         </div>
 
         <div className="skel-hero">
-          <div className="skel-hero-grid">
-            <div className="skel-hero-copy">
-              <SkeletonBase variant="rect" style={{ width: "45%", height: 14 }} />
-              <SkeletonBase variant="rect" style={{ width: "100%", height: 44 }} />
-              <SkeletonBase variant="rect" style={{ width: "84%", height: 44 }} />
-              <SkeletonBase variant="rect" style={{ width: "72%", height: 18 }} />
-              <SkeletonBase variant="rect" style={{ width: "60%", height: 18 }} />
-              <div className="skel-cta-row">
-                <SkeletonBase variant="rect" style={{ width: 220, height: 44, borderRadius: 999 }} />
-                <SkeletonBase variant="rect" style={{ width: 140, height: 44, borderRadius: 999 }} />
-              </div>
-              <SkeletonBase variant="rect" style={{ width: 260, height: 36, borderRadius: 999 }} />
-            </div>
-            <div className="skel-hero-side">
-              <SkeletonBase variant="rect" style={{ height: 220 }} />
-              <SkeletonBase variant="rect" style={{ height: 160 }} />
-            </div>
+          <div className="skel-hero-stack">
+            <SkeletonBase variant="rect" style={{ width: "100%", height: 52 }} />
+            <SkeletonBase variant="rect" style={{ width: "84%", height: 52 }} />
+            <SkeletonBase variant="rect" style={{ width: "72%", height: 18 }} />
+            <SkeletonBase variant="rect" style={{ width: "58%", height: 16 }} />
           </div>
+          <div className="skel-hero-options">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="skel-hero-card">
+                <SkeletonBase variant="rect" style={{ width: "72%", height: 18 }} />
+                <SkeletonBase variant="rect" style={{ width: "88%", height: 14 }} />
+                <SkeletonBase variant="rect" style={{ width: "66%", height: 14 }} />
+                <SkeletonBase variant="rect" style={{ width: "52%", height: 14, borderRadius: 999 }} />
+              </div>
+            ))}
+          </div>
+          <SkeletonBase variant="rect" style={{ width: "42%", height: 14 }} />
         </div>
 
-        <SectionSkeleton />
-        <SectionSkeleton />
-        <SectionSkeleton />
+        <SectionSkeleton cardCount={2} />
+        <SectionSkeleton cardCount={1} />
+        <SectionSkeleton cardCount={2} />
+        <SectionSkeleton cardCount={2} />
+        <SectionSkeleton cardCount={2} />
+        <SectionSkeleton cardCount={1} />
       </div>
     </div>
   );

@@ -70,7 +70,7 @@ export default function Footer() {
   ];
 
   const scrollToCta = () => {
-    const el = document.getElementById("cta");
+    const el = document.getElementById("review");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -130,11 +130,13 @@ export default function Footer() {
               }}
             >
               <Stack spacing={1.5}>
-                <Typography variant="h6">Request a Review (Recorded)</Typography>
+                <Typography variant="h6">Request 5-minute review</Typography>
                 <Typography variant="body2" color="text.secondary">
                   Send me your site and I&apos;ll tell you what to fix first.
                 </Typography>
                 <Button
+                  component="a"
+                  href="#review"
                   onClick={scrollToCta}
                   variant="contained"
                   size="large"
@@ -145,7 +147,7 @@ export default function Footer() {
                     px: 3,
                   }}
                 >
-                  Request a Review (Recorded)
+                  Request 5-minute review
                 </Button>
               </Stack>
             </Box>

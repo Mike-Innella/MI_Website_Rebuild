@@ -43,7 +43,7 @@ export default function RelayWidget() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState("");
-  const [leadIntent, setLeadIntent] = useState("");
+  const [cta, setCta] = useState<{ label: string; href: string } | null>(null);
   const streamingIndexRef = useRef<number | null>(null);
 
   const apiBaseUrl = useMemo(() => {
@@ -131,7 +131,7 @@ export default function RelayWidget() {
     setInput("");
     setIsSending(true);
     setError("");
-    setLeadIntent("");
+    setCta(null);
 
     let fullReply = "";
 
@@ -197,7 +197,7 @@ export default function RelayWidget() {
                 if (payload.sessionId || sessionId) {
                   setSessionId(payload.sessionId || sessionId);
                 }
-                setLeadIntent(payload.leadIntent || "");
+                setCta(payload.cta || null);
               } else if (payload.type === "error") {
                 throw new Error(payload.error || "Relay ran into an error.");
               }
@@ -218,16 +218,16 @@ export default function RelayWidget() {
         }
       } else {
         const data = await response.json();
-        if (!data?.reply) {
-          throw new Error("Relay did not return a response.");
+        if (data?.ok === false) {
+          throw new Error(data?.error || "Relay did not return a response.");
         }
-        fullReply = String(data.reply || "").trim();
+        fullReply = String(data?.reply || "").trim();
         if (!fullReply) {
           throw new Error("Relay did not return a response.");
         }
         setAssistantContent(fullReply);
-        setSessionId(data.sessionId || sessionId);
-        setLeadIntent(data.leadIntent || "");
+        setSessionId(data?.sessionId || sessionId);
+        setCta(data?.cta || null);
       }
 
       streamingIndexRef.current = null;
@@ -249,8 +249,12 @@ export default function RelayWidget() {
     sendMessage(text);
   };
 
-  const scrollToCta = () => {
-    const target = document.getElementById("cta");
+  const scrollToCta = (href?: string) => {
+    const targetId = (href && href.startsWith("#") ? href.slice(1) : href) || "review";
+    const target =
+      document.getElementById(targetId) ||
+      (targetId !== "review" ? document.getElementById("review") : null) ||
+      document.getElementById("contact");
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
     }
@@ -274,12 +278,18 @@ export default function RelayWidget() {
             transition: "opacity 200ms ease",
             bgcolor:
               theme.palette.mode === "dark"
-                ? "rgba(255, 255, 255, 0.08)"
+                ? "rgba(20, 24, 33, 0.9)"
                 : "rgba(15, 23, 42, 0.06)",
             color: "text.secondary",
             border: "1px solid",
             borderColor: "divider",
             boxShadow: "var(--shadow-soft)",
+            "&:hover": {
+              bgcolor:
+                theme.palette.mode === "dark"
+                  ? "rgba(15, 18, 26, 0.85)"
+                  : "rgba(15, 23, 42, 0.12)",
+            },
           }}
         >
           <ChatBubbleOutlineIcon />
@@ -394,12 +404,12 @@ export default function RelayWidget() {
                 />
               ))}
             </Stack>
-            {leadIntent === "ready_to_submit" ? (
+            {cta ? (
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="text.secondary">
-                  You can submit your site in the form below.
+                  {cta.label}
                 </Typography>
-                <Button size="small" onClick={scrollToCta} sx={{ mt: 1 }}>
+                <Button size="small" onClick={() => scrollToCta(cta.href)} sx={{ mt: 1 }}>
                   Go to form
                 </Button>
               </Box>

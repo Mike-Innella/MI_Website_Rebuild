@@ -109,24 +109,17 @@ export default function ProofSection() {
                 </Box>
               </Stack>
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} sx={{ mt: 1 }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => {
-                    const el = document.getElementById("cta");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
-                >
-                Request a Review (Recorded)
-              </Button>
+                <Button variant="contained" size="large" component="a" href="#review">
+                  Request 5-minute review
+                </Button>
                 <Button
                   size="large"
-                  variant="outlined"
+                  variant="text"
                   component="a"
                   href="https://www.howardmotorco.net/"
                   target="_blank"
                   rel="noreferrer"
-                  sx={{ whiteSpace: "nowrap" }}
+                  sx={{ whiteSpace: "nowrap", px: 1 }}
                 >
                   View live site
                 </Button>

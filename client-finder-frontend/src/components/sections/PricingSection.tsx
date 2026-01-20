@@ -14,7 +14,7 @@ const supportIncludes = [
   "Priority response",
 ];
 
-const supportIsNot = ["Not required.", "Not a contract trap.", "Only available after a build."];
+const supportIsNot = ["Not required.", "Only available after a build.", "No long commitments."];
 
 export default function PricingSection() {
   const theme = useTheme();
@@ -25,7 +25,7 @@ export default function PricingSection() {
       id="offer-support"
       eyebrow="For clients who want continued support"
       title="Ongoing Website Support"
-      subtitle="For clients who want their site handled, not babysat."
+      subtitle="Optional add-on after a build for clients who want their site handled, not babysat."
       variant="tinted"
       disableSpine
       sx={{ py: sectionPaddingCompact }}
@@ -101,9 +101,6 @@ export default function PricingSection() {
                   <Typography variant="h4" sx={{ mt: 0.5, fontWeight: 900 }}>
                     $100 / month
                   </Typography>
-                  <Typography color="text.secondary" sx={{ mt: 0.25 }}>
-                    Cancel anytime
-                  </Typography>
                 </Box>
                 <Typography color="text.secondary">
                   A calm retention offer for post-build clients who want someone watching the site.
@@ -111,12 +108,10 @@ export default function PricingSection() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() => {
-                    const el = document.getElementById("cta");
-                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                  }}
+                  component="a"
+                  href="#review"
                 >
-                  Request Free Review
+                  Request 5-minute review
                 </Button>
               </CardContent>
             </Card>

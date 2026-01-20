@@ -143,7 +143,7 @@ export default function Navbar() {
             {!isMobile && (
               <Button
                 variant="contained"
-                onClick={() => scrollToId("cta")}
+                onClick={() => scrollToId("review")}
                 sx={{
                   width: navPillWidth,
                   minWidth: navPillWidth,
@@ -224,7 +224,7 @@ export default function Navbar() {
           <Button
             variant="contained"
             onClick={() => {
-              scrollToId("cta");
+              scrollToId("review");
               setMobileOpen(false);
             }}
           >

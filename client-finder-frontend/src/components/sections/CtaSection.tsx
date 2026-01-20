@@ -26,11 +26,9 @@ const initialState = {
   businessType: "",
   company: "",
   message: "",
-  timeline: "",
 };
 
 const businessTypes = ["Local service", "Online service", "Ecommerce", "Creator/portfolio", "Other"];
-const timelines = ["Within 2 weeks", "Within 30 days", "1–2 months", "Not sure yet"];
 
 export default function CtaSection() {
   const theme = useTheme();
@@ -46,14 +44,12 @@ export default function CtaSection() {
   const trimmedWebsiteUrl = form.websiteUrl.trim();
   const trimmedBusinessType = form.businessType.trim();
   const trimmedMessage = form.message.trim();
-  const trimmedTimeline = form.timeline.trim();
 
   const errors = {
     name: trimmedName ? "" : "Name is required.",
     email: trimmedEmail.length ? (emailPattern.test(trimmedEmail) ? "" : "Enter a valid email.") : "Email is required.",
     websiteUrl: trimmedWebsiteUrl ? "" : "Website URL is required.",
     businessType: trimmedBusinessType ? "" : "Business type is required.",
-    timeline: trimmedTimeline ? "" : "Timeline is required.",
   };
 
   const handleChange = (event) => {
@@ -96,7 +92,6 @@ export default function CtaSection() {
         websiteUrl: normalizedUrl,
         businessType: trimmedBusinessType,
         message: trimmedMessage || "No additional notes provided.",
-        timeline: trimmedTimeline,
       });
 
       setIsSuccess(true);
@@ -111,9 +106,9 @@ export default function CtaSection() {
 
   return (
     <Section
-      id="cta"
+      id="review"
       eyebrow="Contact"
-      title="Get a Free Website Review"
+      title="Request 5-minute review"
       subtitle="I’ll record a short Loom video reviewing your site and showing what’s holding it back."
       variant="paper"
       disableSpine
@@ -125,6 +120,7 @@ export default function CtaSection() {
             : "linear-gradient(180deg, rgba(11, 61, 145, 0.06), rgba(255, 255, 255, 0.95))",
       }}
     >
+      <Box id="contact" sx={{ position: "relative", top: "-80px", height: 0 }} />
       <Grid
         container
         spacing={{ xs: 3, md: 4 }}
@@ -232,25 +228,6 @@ export default function CtaSection() {
                       ))}
                     </TextField>
                     <TextField
-                      id="cta-timeline"
-                      select
-                      label="When do you want changes live?"
-                      name="timeline"
-                      value={form.timeline}
-                      onChange={handleChange}
-                      required
-                      disabled={isLoading}
-                      error={hasSubmitted && Boolean(errors.timeline)}
-                      helperText={hasSubmitted && errors.timeline ? errors.timeline : ""}
-                      fullWidth
-                    >
-                      {timelines.map((time) => (
-                        <MenuItem key={time} value={time}>
-                          {time}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                    <TextField
                       id="cta-message"
                       label="Anything specific you want me to look at? (optional)"
                       name="message"
@@ -291,10 +268,10 @@ export default function CtaSection() {
                       disabled={isLoading}
                       sx={{ minHeight: 54 }}
                     >
-                      {isLoading ? "Sending..." : "Request a Review (Recorded)"}
+                      {isLoading ? "Sending..." : "Request 5-minute review"}
                     </Button>
                     <Typography variant="body2" color="text.secondary">
-                      I’ll reply within 24–48 hours with a Loom recording.
+                      You’ll usually get your review within 24–48 hours.
                     </Typography>
                   </Stack>
                 </Box>

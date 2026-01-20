@@ -31,19 +31,17 @@ export default function FinalCtaSection() {
                   Not sure which option fits?
                 </Typography>
                 <Typography color="text.secondary">
-                  Request a Review (Recorded).
+                  Request 5-minute review.
                 </Typography>
               </Box>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={() => {
-                  const el = document.getElementById("cta");
-                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-              >
-                Request a Review (Recorded)
-              </Button>
+              <Stack spacing={1} alignItems={{ xs: "flex-start", md: "flex-end" }}>
+                <Button variant="contained" size="large" component="a" href="#review">
+                  Request 5-minute review
+                </Button>
+                <Typography variant="body2" color="text.secondary">
+                  Ongoing support is optional — you’re not locked into anything.
+                </Typography>
+              </Stack>
             </Stack>
           </CardContent>
         </Card>
