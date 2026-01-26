@@ -1,6 +1,6 @@
 import "./globals.css";
 import "../components/skeleton/skeleton.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
@@ -48,6 +48,8 @@ export const metadata: Metadata = {
       {
         url: siteConfig.socialImagePath,
         alt: `${siteConfig.siteName} logo`,
+        width: siteConfig.socialImageWidth,
+        height: siteConfig.socialImageHeight,
       },
     ],
   },
@@ -67,6 +69,18 @@ export const metadata: Metadata = {
     shortcut: siteConfig.faviconPath,
     apple: siteConfig.logoPath,
   },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: siteConfig.themeColor.light },
+    { media: "(prefers-color-scheme: dark)", color: siteConfig.themeColor.dark },
+  ],
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "light dark",
+  themeColor: siteConfig.themeColor.light,
 };
 
 export default function RootLayout({ children }) {

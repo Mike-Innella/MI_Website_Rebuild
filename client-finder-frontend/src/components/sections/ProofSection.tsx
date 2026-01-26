@@ -111,13 +111,13 @@ export default function ProofSection() {
                 boxShadow: "var(--shadow-soft)",
               }}
             >
-              <Image
-                src="/assets/howmoco.png"
-                alt="Howard Motor Company homepage preview"
-                fill
-                style={{ objectFit: "cover" }}
-                sizes="(max-width: 1200px) 100vw, 720px"
-                loading="lazy"
+                <Image
+                  src="/assets/howmoco.webp"
+                  alt="Howard Motor Company homepage preview"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 1200px) 100vw, 720px"
+                  loading="lazy"
               />
               <Box
                 sx={{

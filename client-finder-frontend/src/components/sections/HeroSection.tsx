@@ -7,7 +7,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useTheme } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import { maxHeroWidth, maxTextWidth, sectionPaddingY } from "@/lib/layoutTokens";
@@ -35,6 +34,26 @@ const heroOptions = [
     cta: "Request 5-minute review",
   },
 ];
+
+const ArrowIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+    style={{ display: "block" }}
+  >
+    <path
+      d="M5 12h12M13 6l6 6-6 6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
@@ -169,7 +188,9 @@ export default function HeroSection() {
                       <Typography variant="body2" color="primary" sx={{ fontWeight: 700 }}>
                         {option.cta}
                       </Typography>
-                      <ArrowForwardIcon fontSize="small" color="primary" />
+                      <Box component="span" sx={{ color: "primary.main" }}>
+                        <ArrowIcon />
+                      </Box>
                     </Stack>
                   </Paper>
                 </Grid>

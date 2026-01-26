@@ -132,8 +132,8 @@ export default function Footer() {
                 <Image
                   src={
                     theme.palette.mode === "light"
-                      ? "/assets/MILogo_dark.png"
-                      : "/assets/MILogo.png"
+                      ? "/assets/MILogo_dark_ui.webp"
+                      : "/assets/MILogo_ui.webp"
                   }
                   alt="MI Website Rebuilds logo"
                   width={46}

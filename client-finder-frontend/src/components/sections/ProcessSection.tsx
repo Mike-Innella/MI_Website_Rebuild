@@ -25,18 +25,11 @@ export default function ProcessSection() {
   const intervalDuration = 2600;
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setActiveIndex((prev) => (prev + 1) % steps.length);
-    }, intervalDuration);
-    return () => window.clearTimeout(timeoutId);
-  }, [activeIndex, intervalDuration]);
-
-  useEffect(() => {
     const intervalId = window.setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % steps.length);
-    }, 2600);
+    }, intervalDuration);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [intervalDuration]);
 
   return (
     <Section

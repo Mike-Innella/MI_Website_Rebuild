@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type SVGProps } from "react";
 import {
   AppBar,
   Box,
@@ -18,9 +18,6 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import MenuIcon from "@mui/icons-material/Menu";
 import { useThemeMode } from "@/app/providers";
 
 function scrollToId(id) {
@@ -34,6 +31,46 @@ const navLinks = [
   { id: "recent-rebuild", label: "Recent Rebuild" },
 ];
 const navPillWidth = 160;
+
+const SunIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M12 3.5v2.2M12 18.3v2.2M4.7 4.7l1.6 1.6M17.7 17.7l1.6 1.6M3.5 12h2.2M18.3 12h2.2M4.7 19.3l1.6-1.6M17.7 6.3l1.6-1.6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
+  </svg>
+);
+
+const MoonIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M20 14.6A8.5 8.5 0 0 1 9.4 4a7 7 0 1 0 10.6 10.6Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const MenuIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" {...props}>
+    <path
+      d="M4 7h16M4 12h16M4 17h16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export default function Navbar() {
   const theme = useTheme();
@@ -93,8 +130,8 @@ export default function Navbar() {
               <Image
                 src={
                   mode === "light"
-                    ? "/assets/MILogo_dark.png"
-                    : "/assets/MILogo.png"
+                    ? "/assets/MILogo_dark_ui.webp"
+                    : "/assets/MILogo_ui.webp"
                 }
                 alt="MI Website Rebuilds logo"
                 width={48}
@@ -186,7 +223,7 @@ export default function Navbar() {
                   borderRadius: 2,
                 }}
               >
-                <MenuIcon />
+                <MenuIcon width={22} height={22} />
               </IconButton>
             )}
             <IconButton
@@ -198,9 +235,9 @@ export default function Navbar() {
               }}
             >
               {mode === "dark" ? (
-                <LightModeOutlinedIcon />
+                <SunIcon width={20} height={20} />
               ) : (
-                <DarkModeOutlinedIcon />
+                <MoonIcon width={20} height={20} />
               )}
             </IconButton>
           </Stack>

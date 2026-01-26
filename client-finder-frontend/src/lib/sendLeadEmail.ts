@@ -1,8 +1,7 @@
-import emailjs from "@emailjs/browser";
-
 // EmailJS template must reference: {{name}} {{email}} {{websiteUrl}} {{businessType}} {{message}}
 
 export async function sendLeadEmail({ name, email, websiteUrl, businessType, message }) {
+  const emailjs = (await import("@emailjs/browser")).default;
   const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID;
   const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID;
   const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
