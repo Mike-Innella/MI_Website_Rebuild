@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type SVGProps } from "react";
+import { useState, type SVGProps } from "react";
 import {
   AppBar,
   Box,
@@ -76,34 +76,7 @@ export default function Navbar() {
   const theme = useTheme();
   const { mode, toggleMode } = useThemeMode();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [activeSection, setActiveSection] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const elements = navLinks
-      .map((link) => document.getElementById(link.id))
-      .filter(Boolean);
-
-    if (!elements.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting);
-        if (!visible.length) return;
-        const mostVisible = visible.sort(
-          (a, b) => b.intersectionRatio - a.intersectionRatio,
-        )[0];
-        setActiveSection(mostVisible.target.id);
-      },
-      {
-        rootMargin: "-40% 0px -50% 0px",
-        threshold: [0.2, 0.5, 0.8],
-      },
-    );
-
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <AppBar
@@ -142,7 +115,7 @@ export default function Navbar() {
             </Box>
             <Typography
               variant="subtitle1"
-              fontWeight={800}
+              fontWeight={700}
               sx={{ letterSpacing: "-0.02em" }}
             >
               Website Rebuilds
@@ -168,14 +141,8 @@ export default function Navbar() {
                   onClick={() => scrollToId(link.id)}
                   sx={{
                     borderBottom: "2px solid",
-                    borderColor:
-                      activeSection === link.id
-                        ? "primary.main"
-                        : "transparent",
-                    color:
-                      activeSection === link.id
-                        ? "primary.main"
-                        : "text.primary",
+                    borderColor: "transparent",
+                    color: "text.primary",
                     borderRadius: "var(--radius-pill)",
                     width: navPillWidth,
                     minWidth: navPillWidth,

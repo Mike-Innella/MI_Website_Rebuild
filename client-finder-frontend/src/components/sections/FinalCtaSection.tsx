@@ -27,7 +27,7 @@ export default function FinalCtaSection() {
               justifyContent="space-between"
             >
               <Box>
-                <Typography variant="h5" fontWeight={800}>
+                <Typography variant="h5" fontWeight={700}>
                   Not sure which option fits?
                 </Typography>
                 <Typography color="text.secondary">

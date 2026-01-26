@@ -112,7 +112,7 @@ export default function HeroSection() {
             <Typography
               component="h1"
               variant="h1"
-              fontWeight={900}
+              fontWeight={700}
               sx={{
                 letterSpacing: "-0.03em",
                 lineHeight: 1.04,
@@ -168,18 +168,17 @@ export default function HeroSection() {
                       alignContent: "space-between",
                       minHeight: { xs: 0, md: 180 },
                       boxShadow: "var(--shadow-soft)",
-                      transition: "transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease",
+                      transition: "transform 0.2s ease",
                       "@media (hover: hover) and (pointer: fine)": {
                         "&:hover": {
                           transform: "translateY(-6px)",
-                          boxShadow: "var(--shadow-strong)",
                           borderColor: "primary.main",
                         },
                       },
                     }}
                   >
                     <Stack spacing={1}>
-                      <Typography variant="h5" fontWeight={800} sx={{ lineHeight: 1.2 }}>
+                      <Typography variant="h5" fontWeight={700} sx={{ lineHeight: 1.2 }}>
                         {option.title}
                       </Typography>
                       <Typography color="text.secondary">{option.caption}</Typography>

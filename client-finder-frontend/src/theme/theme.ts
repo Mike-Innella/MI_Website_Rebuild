@@ -54,25 +54,25 @@ export const getAppTheme = (mode = "light") => {
       fontFamily: "var(--font-body)",
       h1: {
         fontFamily: "var(--font-head)",
-        fontWeight: 800,
+        fontWeight: 700,
         letterSpacing: "-0.02em",
         fontSize: "clamp(2.4rem, 1.6rem + 2.8vw, 4rem)",
       },
       h2: {
         fontFamily: "var(--font-head)",
-        fontWeight: 800,
+        fontWeight: 700,
         letterSpacing: "-0.02em",
         fontSize: "clamp(2rem, 1.4rem + 2.2vw, 3.4rem)",
       },
       h3: {
         fontFamily: "var(--font-head)",
-        fontWeight: 800,
+        fontWeight: 700,
         letterSpacing: "-0.02em",
         fontSize: "clamp(1.7rem, 1.2rem + 1.6vw, 2.6rem)",
       },
       h4: {
         fontFamily: "var(--font-head)",
-        fontWeight: 800,
+        fontWeight: 700,
         letterSpacing: "-0.02em",
         fontSize: "clamp(1.5rem, 1.15rem + 1.2vw, 2.1rem)",
       },
@@ -102,7 +102,6 @@ export const getAppTheme = (mode = "light") => {
               mode === "dark"
                 ? "radial-gradient(circle at top, rgba(93, 169, 255, 0.12), transparent 50%), radial-gradient(circle at 20% 20%, rgba(253, 186, 116, 0.08), transparent 45%)"
                 : "radial-gradient(circle at top, rgba(11, 61, 145, 0.1), transparent 45%), radial-gradient(circle at 20% 20%, rgba(249, 115, 22, 0.1), transparent 40%)",
-            backgroundAttachment: "fixed",
           },
         },
       },
@@ -123,13 +122,9 @@ export const getAppTheme = (mode = "light") => {
             paddingRight: 18,
             paddingTop: 10,
             paddingBottom: 10,
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            transition: "transform 0.2s ease",
             "&:hover": {
               transform: "translateY(-1px)",
-              boxShadow:
-                mode === "dark"
-                  ? "0 12px 24px rgba(0, 0, 0, 0.35)"
-                  : "0 12px 24px rgba(15, 23, 42, 0.12)",
             },
           },
         },
@@ -165,11 +160,10 @@ export const getAppTheme = (mode = "light") => {
             borderRadius: 18,
             border: `1px solid ${palette.divider}`,
             boxShadow: "var(--shadow-soft)",
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            transition: "transform 0.2s ease",
             "@media (hover: hover) and (pointer: fine)": {
               "&:hover": {
                 transform: "translateY(-4px)",
-                boxShadow: "var(--shadow-strong)",
               },
             },
           },

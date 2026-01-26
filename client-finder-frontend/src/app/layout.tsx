@@ -1,14 +1,23 @@
 import "./globals.css";
 import "../components/skeleton/skeleton.css";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Manrope, Space_Grotesk } from "next/font/google";
 import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
 import { siteConfig, siteUrl } from "@/lib/siteConfig";
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ["latin"],
   display: "swap",
+  variable: "--font-body",
+  weight: ["400", "600", "700"],
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-head",
+  weight: ["500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -69,10 +78,6 @@ export const metadata: Metadata = {
     shortcut: siteConfig.faviconPath,
     apple: siteConfig.logoPath,
   },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: siteConfig.themeColor.light },
-    { media: "(prefers-color-scheme: dark)", color: siteConfig.themeColor.dark },
-  ],
   manifest: "/manifest.webmanifest",
 };
 
@@ -80,13 +85,19 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   colorScheme: "light dark",
-  themeColor: siteConfig.themeColor.light,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: siteConfig.themeColor.light },
+    { media: "(prefers-color-scheme: dark)", color: siteConfig.themeColor.dark },
+  ],
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body
+        className={`${manrope.variable} ${spaceGrotesk.variable}`}
+        suppressHydrationWarning
+      >
         <Providers>
           {children}
           <Footer />
