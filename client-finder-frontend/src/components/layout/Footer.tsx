@@ -28,10 +28,22 @@ export default function Footer() {
       label: "What's included?",
       title: "What's included",
       body: (
-        <>
-          I focus on fast, conversion-ready rebuilds: clearer messaging, a sharper CTA
-          path, mobile polish, and performance improvements so visitors take action.
-        </>
+        <Stack spacing={1.5}>
+          <Typography color="text.secondary">Deliverables:</Typography>
+          <Stack spacing={0.75} color="text.secondary">
+            <Typography>• Design refresh with clearer messaging</Typography>
+            <Typography>• Mobile-first layout polish</Typography>
+            <Typography>• Performance basics (speed + stability)</Typography>
+            <Typography>• CTA clarity and contact flow</Typography>
+            <Typography>• Contact form setup (EmailJS)</Typography>
+          </Stack>
+          <Typography color="text.secondary">Not included:</Typography>
+          <Stack spacing={0.75} color="text.secondary">
+            <Typography>• Custom web apps or dashboards</Typography>
+            <Typography>• Large ecommerce migrations</Typography>
+            <Typography>• Ongoing content production</Typography>
+          </Stack>
+        </Stack>
       ),
     },
     {
@@ -39,21 +51,34 @@ export default function Footer() {
       label: "Privacy?",
       title: "Privacy",
       body: (
-        <>
-          Your details are only used to send the review and follow-up. I never share or
-          sell contact information.
-        </>
+        <Stack spacing={1.5}>
+          <Typography color="text.secondary">
+            Your info is used only to reply and discuss the rebuild.
+          </Typography>
+          <Typography color="text.secondary">
+            EmailJS sends the email — no database storage or third-party resale.
+          </Typography>
+        </Stack>
       ),
     },
     {
       id: "speed",
       label: "How fast?",
-      title: "How fast is the review?",
+      title: "How fast is the rebuild?",
       body: (
-        <>
-          Most reviews go out within 24-48 hours. If I need more context, I will ask a
-          quick follow-up.
-        </>
+        <Stack spacing={1.5}>
+          <Typography color="text.secondary">
+            Typical timeline is 7 days from kickoff to launch.
+          </Typography>
+          <Stack spacing={0.75} color="text.secondary">
+            <Typography>• Day 1: Goals + content priorities</Typography>
+            <Typography>• Days 2–5: Rebuild + revisions</Typography>
+            <Typography>• Days 6–7: QA + launch</Typography>
+          </Stack>
+          <Typography color="text.secondary">
+            I’ll need assets, access, and any must-have copy to keep the timeline tight.
+          </Typography>
+        </Stack>
       ),
     },
     {
@@ -61,10 +86,13 @@ export default function Footer() {
       label: "How do I start?",
       title: "How do I start?",
       body: (
-        <>
-          Send your site, and I will reply with the biggest friction points and quick
-          wins. If it looks like a fit, we can book a short kickoff.
-        </>
+        <Stack spacing={1.5}>
+          <Stack spacing={0.75} color="text.secondary">
+            <Typography>Step 1: Submit the form.</Typography>
+            <Typography>Step 2: I reply with the top fixes + next step.</Typography>
+            <Typography>Step 3: We kick off the rebuild.</Typography>
+          </Stack>
+        </Stack>
       ),
     },
   ];
@@ -83,7 +111,7 @@ export default function Footer() {
         borderTop: 1,
         borderColor: "divider",
         py: { xs: 5, md: 8 },
-        mt: { xs: 6, md: 8 },
+        mt: 0,
         backdropFilter: "blur(12px)",
         background:
           theme.palette.mode === "dark"
@@ -202,9 +230,7 @@ export default function Footer() {
         <DialogTitle id="footer-dialog-title" sx={{ fontWeight: 800 }}>
           {activeContent?.title}
         </DialogTitle>
-        <DialogContent sx={{ pt: 0, pb: 2 }}>
-          <Typography color="text.secondary">{activeContent?.body}</Typography>
-        </DialogContent>
+        <DialogContent sx={{ pt: 0, pb: 2 }}>{activeContent?.body}</DialogContent>
         <DialogActions sx={{ pr: 2, pb: 2 }}>
           <Button onClick={() => setActiveModal(null)}>Close</Button>
         </DialogActions>

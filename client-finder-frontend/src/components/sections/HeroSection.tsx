@@ -15,19 +15,22 @@ import { maxHeroWidth, maxTextWidth, sectionPaddingY } from "@/lib/layoutTokens"
 const heroOptions = [
   {
     title: "My site needs credibility",
-    caption: "You want it to look professional and trustworthy.",
+    caption:
+      "You want it to look professional and trustworthy. Clean messaging, strong proof, and a modern layout make it feel legit.",
     targetId: "review",
     cta: "Request 5-minute review",
   },
   {
     title: "My site isn’t getting inquiries",
-    caption: "You want more people to contact you.",
+    caption:
+      "You want more people to contact you. I’ll point out the drop-off points and tighten the path to your CTA.",
     targetId: "review",
     cta: "Request 5-minute review",
   },
   {
     title: "I’m ready to rebuild",
-    caption: "You want a clear plan for the new site before starting.",
+    caption:
+      "You want a clear plan for the new site before starting. We’ll map pages, content priorities, and scope before design begins.",
     targetId: "review",
     cta: "Request 5-minute review",
   },
@@ -178,7 +181,7 @@ export default function HeroSection() {
               className="reveal"
               style={{ "--delay": "200ms" } as any}
             >
-              I’ll record a short Loom showing what’s blocking inquiries.
+              Send your site — I’ll reply with the top fixes you should make first.
             </Typography>
           </Stack>
         </Box>

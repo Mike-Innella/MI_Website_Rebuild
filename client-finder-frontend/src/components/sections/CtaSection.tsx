@@ -45,23 +45,37 @@ export default function CtaSection() {
   const trimmedBusinessType = form.businessType.trim();
   const trimmedMessage = form.message.trim();
 
+  const normalizeUrl = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
+  const isValidUrl = (value: string) => {
+    if (!value) return false;
+    try {
+      const parsed = new URL(value);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch (error) {
+      return false;
+    }
+  };
+
   const errors = {
     name: trimmedName ? "" : "Name is required.",
     email: trimmedEmail.length ? (emailPattern.test(trimmedEmail) ? "" : "Enter a valid email.") : "Email is required.",
-    websiteUrl: trimmedWebsiteUrl ? "" : "Website URL is required.",
+    websiteUrl: trimmedWebsiteUrl
+      ? isValidUrl(normalizeUrl(trimmedWebsiteUrl))
+        ? ""
+        : "Enter a valid URL."
+      : "Website URL is required.",
     businessType: trimmedBusinessType ? "" : "Business type is required.",
   };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const normalizeUrl = (value: string) => {
-    const trimmed = value.trim();
-    if (!trimmed) return "";
-    if (/^https?:\/\//i.test(trimmed)) return trimmed;
-    return `https://${trimmed}`;
   };
 
   const handleSubmit = async (event) => {
@@ -98,7 +112,7 @@ export default function CtaSection() {
       setForm(initialState);
       setHasSubmitted(false);
     } catch (error) {
-      setErrorMessage(error?.message || "Something went wrong.");
+      setErrorMessage("Something failed — please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +123,7 @@ export default function CtaSection() {
       id="review"
       eyebrow="Contact"
       title="Request 5-minute review"
-      subtitle="I’ll record a short Loom video reviewing your site and showing what’s holding it back."
+      subtitle="You’ll get: 3 priority fixes + a suggested next step."
       variant="paper"
       disableSpine
       sx={{
@@ -144,9 +158,9 @@ export default function CtaSection() {
             <CardContent sx={{ p: { xs: 2.5, md: 3 }, height: "100%", display: "flex", flexDirection: "column" }}>
               {isSuccess ? (
                 <Stack spacing={1.5} sx={{ flex: 1, justifyContent: "center" }}>
-                  <Typography variant="h6">Thanks — review on the way.</Typography>
+                  <Typography variant="h6">Got it — I’ll reply soon.</Typography>
                   <Typography color="text.secondary">
-                    I’ll send a short recording that calls out the biggest fixes to make.
+                    You’ll get a concise reply with the top fixes and a clear next step.
                   </Typography>
                   <Button
                     variant="text"
@@ -168,7 +182,7 @@ export default function CtaSection() {
                     <Stack spacing={0.5}>
                       <Typography variant="h5">Required fields only</Typography>
                       <Typography variant="body2" color="text.secondary">
-                        A quick form so I can tailor the recording to your business.
+                        A quick form so I can tailor the feedback to your business.
                       </Typography>
                     </Stack>
                     <TextField
@@ -271,6 +285,9 @@ export default function CtaSection() {
                       {isLoading ? "Sending..." : "Request 5-minute review"}
                     </Button>
                     <Typography variant="body2" color="text.secondary">
+                      I personally review every submission.
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
                       You’ll usually get your review within 24–48 hours.
                     </Typography>
                   </Stack>
@@ -290,7 +307,7 @@ export default function CtaSection() {
               display: "flex",
               flexDirection: "column",
             }}
-          >
+            >
             <CardContent
               sx={{
                 p: { xs: 2.5, md: 3.5 },
@@ -302,17 +319,17 @@ export default function CtaSection() {
             >
               <Box sx={{ color: "text.secondary" }}>
                 <Typography>
-                  I’ll record a short Loom pointing out what’s blocking inquiries and where quick wins are hiding.
+                  You’ll get a short, direct response on what’s blocking inquiries and what to fix first.
                 </Typography>
               </Box>
               <Box sx={{ display: "grid", gap: 2 }}>
                 <Box>
                   <Typography variant="h6">What you’ll receive</Typography>
                   <Stack spacing={1.25} color="text.secondary" sx={{ mt: 1.25 }}>
-                    <Typography>• A recorded walkthrough of your current site</Typography>
-                    <Typography>• The biggest blockers to getting more inquiries</Typography>
-                    <Typography>• The fastest fixes to test first</Typography>
-                    <Typography>• A short plan on what to improve first</Typography>
+                    <Typography>• 3 priority fixes tailored to your site</Typography>
+                    <Typography>• A clear suggested next step</Typography>
+                    <Typography>• Notes on what to adjust first for more inquiries</Typography>
+                    <Typography>• A simple plan to move forward without guesswork</Typography>
                   </Stack>
                 </Box>
                 <Box>

@@ -231,29 +231,6 @@ a {
   background: linear-gradient(90deg, transparent, rgba(93, 169, 255, 0.45), transparent);
 }
 
-@keyframes relayDotPulse {
-  0%,
-  80%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.75);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.relay-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  display: inline-block;
-  background: currentColor;
-  animation: relayDotPulse 1.2s ease-in-out infinite;
-  animation-delay: var(--relay-delay, 0ms);
-}
-
 .pulse-border::after {
   content: "";
   position: absolute;
@@ -275,10 +252,6 @@ a {
   }
 
   .ui-preview-bar.is-active::after {
-    animation: none;
-  }
-
-  .relay-dot {
     animation: none;
   }
 }

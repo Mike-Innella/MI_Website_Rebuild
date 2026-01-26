@@ -9,7 +9,7 @@ import { maxHeroWidth, sectionGap } from "@/lib/layoutTokens";
 import { cardPad, mutedSurface, secondarySurface } from "@/lib/uiStyles";
 
 const steps = [
-  { title: "Recorded 5-minute review", detail: "You see exactly what’s holding the site back." },
+  { title: "5-minute review", detail: "I reply with the top fixes and a clear next step." },
   { title: "Scope confirmation", detail: "We agree on the pages and goals before build starts." },
   { title: "Build + review", detail: "I rebuild quickly, then we do one focused review." },
   {

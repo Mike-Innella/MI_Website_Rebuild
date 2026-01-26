@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
-import RelayWidget from "@/components/relay/RelayWidget";
 import { siteConfig, siteUrl } from "@/lib/siteConfig";
 
 const inter = Inter({
@@ -77,7 +76,6 @@ export default function RootLayout({ children }) {
         <Providers>
           {children}
           <Footer />
-          <RelayWidget />
         </Providers>
       </body>
     </html>

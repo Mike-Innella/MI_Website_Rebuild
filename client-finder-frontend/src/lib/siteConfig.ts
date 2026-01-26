@@ -25,7 +25,6 @@ export const siteConfig = {
     "performance optimization",
     "landing page",
     "web development",
-    "ai website assistant",
     "fast website launch",
     "conversion rate optimization",
     "small business website redesign",
