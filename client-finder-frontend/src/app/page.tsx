@@ -36,8 +36,8 @@ export default function Page() {
         />
         <Navbar />
         <HeroSection />
-        {homeSections.map(({ key, Component, fallback }) => (
-          <LazyMount key={key} fallback={fallback}>
+        {homeSections.map(({ key, anchorId, Component, fallback }) => (
+          <LazyMount key={key} fallback={fallback} anchorId={anchorId}>
             <Component />
           </LazyMount>
         ))}

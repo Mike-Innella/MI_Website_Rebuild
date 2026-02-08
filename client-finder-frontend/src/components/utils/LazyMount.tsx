@@ -2,10 +2,10 @@
 
 import { isValidElement, useEffect, useMemo, useRef, useState } from "react";
 
-export default function LazyMount({ fallback = null, children, rootMargin = "300px" }: any) {
+export default function LazyMount({ fallback = null, children, rootMargin = "300px", anchorId: providedAnchorId }: any) {
   const ref = useRef<any>(null);
   const [show, setShow] = useState(false);
-  const anchorId = useMemo(() => {
+  const inferredAnchorId = useMemo(() => {
     const child = Array.isArray(children) ? children[0] : children;
     if (isValidElement(child)) {
       const id = (child.props as { id?: string })?.id;
@@ -15,6 +15,7 @@ export default function LazyMount({ fallback = null, children, rootMargin = "300
     }
     return undefined;
   }, [children]);
+  const anchorId = providedAnchorId ?? inferredAnchorId;
 
   useEffect(() => {
     if (!ref.current || show) return;

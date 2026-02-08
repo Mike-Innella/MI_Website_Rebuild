@@ -6,6 +6,21 @@ import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
 import { siteConfig, siteUrl } from "@/lib/siteConfig";
 
+const themeInitScript = `
+(() => {
+  try {
+    const storageKey = "themeMode";
+    const stored = window.localStorage.getItem(storageKey);
+    const isStoredMode = stored === "light" || stored === "dark";
+    const systemPrefersDark =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const mode = isStoredMode ? stored : (systemPrefersDark ? "dark" : "light");
+    document.documentElement.dataset.theme = mode;
+  } catch {}
+})();
+`;
+
 const manrope = Manrope({
   subsets: ["latin"],
   display: "swap",
@@ -94,6 +109,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body
         className={`${manrope.variable} ${spaceGrotesk.variable}`}
         suppressHydrationWarning

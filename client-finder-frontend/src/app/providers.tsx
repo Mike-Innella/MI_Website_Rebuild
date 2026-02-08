@@ -5,8 +5,10 @@ import { ThemeProvider, CssBaseline } from "@mui/material";
 import { getAppTheme } from "@/theme/theme";
 import ThemeRegistry from "./ThemeRegistry";
 
+type ThemeMode = "light" | "dark";
+
 const ThemeModeContext = React.createContext({
-  mode: "light",
+  mode: "light" as ThemeMode,
   toggleMode: () => {},
 });
 
@@ -17,7 +19,7 @@ export function useThemeMode() {
 const getStoredMode = () => {
   if (typeof window === "undefined") return null;
   const saved = window.localStorage.getItem("themeMode");
-  return saved === "light" || saved === "dark" ? saved : null;
+  return saved === "light" || saved === "dark" ? (saved as ThemeMode) : null;
 };
 
 const getSystemMode = () => {
@@ -29,7 +31,8 @@ const getSystemMode = () => {
 };
 
 export default function Providers({ children }) {
-  const [mode, setMode] = React.useState("light");
+  const [mode, setMode] = React.useState<ThemeMode>("light");
+  const [isThemeReady, setIsThemeReady] = React.useState(false);
   const userPreferenceRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -37,9 +40,17 @@ export default function Providers({ children }) {
     if (saved) {
       userPreferenceRef.current = true;
       setMode(saved);
+      setIsThemeReady(true);
       return;
     }
-    setMode(getSystemMode());
+
+    const attrMode = document.documentElement.dataset.theme;
+    if (attrMode === "light" || attrMode === "dark") {
+      setMode(attrMode);
+    } else {
+      setMode(getSystemMode());
+    }
+    setIsThemeReady(true);
   }, []);
 
   React.useEffect(() => {
@@ -90,7 +101,9 @@ export default function Providers({ children }) {
       <ThemeRegistry>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          {children}
+          <div style={{ visibility: isThemeReady ? "visible" : "hidden" }}>
+            {children}
+          </div>
         </ThemeProvider>
       </ThemeRegistry>
     </ThemeModeContext.Provider>

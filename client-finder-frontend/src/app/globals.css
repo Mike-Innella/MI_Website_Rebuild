@@ -1,6 +1,7 @@
 :root {
   --font-body: "Manrope", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-head: "Space Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color-scheme: light;
   --page-bg: #f8fafc;
   --surface-1: #ffffff;
   --surface-2: #f1f5f9;
@@ -20,6 +21,7 @@
 }
 
 :root[data-theme="dark"] {
+  color-scheme: dark;
   --page-bg: #0f1115;
   --surface-1: #151a22;
   --surface-2: #11161f;
@@ -33,6 +35,25 @@
   --divider-soft: rgba(47, 54, 66, 0.6);
   --skeleton-base: #1c2430;
   --skeleton-sheen: rgba(0, 0, 0, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page-bg: #0f1115;
+    --surface-1: #151a22;
+    --surface-2: #11161f;
+    --text-primary: #e5e7eb;
+    --text-secondary: #a1a1aa;
+    --glow-1: rgba(93, 169, 255, 0.18);
+    --glow-2: rgba(253, 186, 116, 0.14);
+    --shadow-soft: 0 14px 34px rgba(0, 0, 0, 0.4);
+    --shadow-strong: 0 24px 70px rgba(0, 0, 0, 0.5);
+    --divider: #2f3642;
+    --divider-soft: rgba(47, 54, 66, 0.6);
+    --skeleton-base: #1c2430;
+    --skeleton-sheen: rgba(0, 0, 0, 0.4);
+  }
 }
 
 html,
