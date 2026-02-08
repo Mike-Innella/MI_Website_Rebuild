@@ -10,6 +10,7 @@ export default function Section({
   title,
   subtitle,
   children,
+  titleAs = "h3",
   sx = {},
   variant = "plain",
   disableSpine = false,
@@ -62,7 +63,7 @@ export default function Section({
               ) : null}
 
               {title ? (
-                <Typography component="h2" variant="h3" fontWeight={700}>
+                <Typography component={titleAs} variant="h3" fontWeight={700}>
                   {title}
                 </Typography>
               ) : null}

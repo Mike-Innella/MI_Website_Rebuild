@@ -42,7 +42,6 @@ const ArrowIcon = () => (
     height="18"
     aria-hidden="true"
     focusable="false"
-    style={{ display: "block" }}
   >
     <path
       d="M5 12h12M13 6l6 6-6 6"
@@ -73,6 +72,7 @@ export default function HeroSection() {
         borderBottom: `1px solid ${theme.palette.divider}`,
         position: "relative",
         overflow: "hidden",
+        minHeight: { xs: "calc(100svh - 72px)", md: "auto" },
         background:
           theme.palette.mode === "dark"
             ? `linear-gradient(180deg, rgba(93, 169, 255, 0.2) 0%, ${theme.palette.background.default} 100%)`
@@ -120,7 +120,7 @@ export default function HeroSection() {
               }}
               className="reveal"
             >
-              Websites built to convert — delivered fast.
+              7-Day Website Rebuilds for Small Businesses
             </Typography>
 
             <Typography
@@ -134,11 +134,27 @@ export default function HeroSection() {
             >
               If your site looks fine but isn’t generating inquiries, I’ll show you exactly why — in 5 minutes.
             </Typography>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              className="reveal"
+              style={{ "--delay": "110ms" } as any}
+            >
+              Start with{" "}
+              <Box component="a" href="#offer-business" sx={{ color: "primary.main", textDecoration: "underline" }}>
+                pricing and scope
+              </Box>{" "}
+              or jump to{" "}
+              <Box component="a" href="#review" sx={{ color: "primary.main", textDecoration: "underline" }}>
+                request your 5-minute review
+              </Box>
+              .
+            </Typography>
 
             <Grid
               container
               spacing={{ xs: 2, md: 3 }}
-              sx={{ mt: 1 }}
+              sx={{ mt: 1, minHeight: { xs: 700, md: 0 } }}
               className="reveal"
               style={{ "--delay": "140ms" } as any}
             >
@@ -166,7 +182,7 @@ export default function HeroSection() {
                       display: "grid",
                       gap: 1,
                       alignContent: "space-between",
-                      minHeight: { xs: 0, md: 180 },
+                      minHeight: { xs: 220, md: 180 },
                       boxShadow: "var(--shadow-soft)",
                       transition: "transform 0.2s ease",
                       "@media (hover: hover) and (pointer: fine)": {
@@ -184,7 +200,11 @@ export default function HeroSection() {
                       <Typography color="text.secondary">{option.caption}</Typography>
                     </Stack>
                     <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                      <Typography variant="body2" color="primary" sx={{ fontWeight: 700 }}>
+                      <Typography
+                        variant="body2"
+                        color="primary"
+                        sx={{ fontWeight: 700, lineHeight: 1.25 }}
+                      >
                         {option.cta}
                       </Typography>
                       <Box component="span" sx={{ color: "primary.main" }}>

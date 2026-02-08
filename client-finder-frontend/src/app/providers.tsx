@@ -101,7 +101,7 @@ export default function Providers({ children }) {
       <ThemeRegistry>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <div style={{ visibility: isThemeReady ? "visible" : "hidden" }}>
+          <div className={isThemeReady ? "theme-ready" : "theme-pending"}>
             {children}
           </div>
         </ThemeProvider>

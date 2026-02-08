@@ -35,7 +35,8 @@ export default function ProcessSection() {
     <Section
       id="process"
       eyebrow="Process"
-      title="How This Works"
+      title="Conversion-Focused Website Rebuild Process"
+      titleAs="h2"
       subtitle="Short, predictable steps to get you live."
       variant="plain"
       disableSpine

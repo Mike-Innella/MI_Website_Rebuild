@@ -2,6 +2,7 @@ import "./globals.css";
 import "../components/skeleton/skeleton.css";
 import type { Metadata, Viewport } from "next";
 import { Manrope, Space_Grotesk } from "next/font/google";
+import Script from "next/script";
 import Providers from "./providers";
 import Footer from "@/components/layout/Footer";
 import { siteConfig, siteUrl } from "@/lib/siteConfig";
@@ -23,23 +24,31 @@ const themeInitScript = `
 
 const manrope = Manrope({
   subsets: ["latin"],
-  display: "swap",
+  display: "optional",
   variable: "--font-body",
   weight: ["400", "600", "700"],
 });
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  display: "swap",
+  display: "optional",
   variable: "--font-head",
   weight: ["500", "600", "700"],
 });
 
+const fallbackPlausibleDomain = (() => {
+  try {
+    const hostname = new URL(siteUrl).hostname;
+    return hostname === "localhost" ? "" : hostname;
+  } catch {
+    return "";
+  }
+})();
+
+const plausibleDomain = process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || fallbackPlausibleDomain;
+
 export const metadata: Metadata = {
-  title: {
-    default: siteConfig.siteName,
-    template: `%s | ${siteConfig.siteName}`,
-  },
+  title: siteConfig.seoTitle,
   description: siteConfig.description,
   metadataBase: new URL(siteUrl),
   alternates: {
@@ -62,7 +71,7 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: siteConfig.siteName,
+    title: siteConfig.seoTitle,
     description: siteConfig.description,
     url: siteUrl,
     siteName: siteConfig.siteName,
@@ -79,7 +88,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.siteName,
+    title: siteConfig.seoTitle,
     description: siteConfig.description,
     images: [siteConfig.socialImagePath],
   },
@@ -116,6 +125,14 @@ export default function RootLayout({ children }) {
         className={`${manrope.variable} ${spaceGrotesk.variable}`}
         suppressHydrationWarning
       >
+        {plausibleDomain ? (
+          <Script
+            defer
+            data-domain={plausibleDomain}
+            src="https://plausible.io/js/script.js"
+            strategy="afterInteractive"
+          />
+        ) : null}
         <Providers>
           {children}
           <Footer />

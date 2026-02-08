@@ -15,7 +15,6 @@ import {
   Stack,
   Toolbar,
   Typography,
-  useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useThemeMode } from "@/app/providers";
@@ -27,6 +26,7 @@ function scrollToId(id) {
 }
 
 const navLinks = [
+  { id: "offer-business", label: "Pricing" },
   { id: "process", label: "Process" },
   { id: "recent-rebuild", label: "Recent Rebuild" },
 ];
@@ -75,7 +75,6 @@ const MenuIcon = (props: SVGProps<SVGSVGElement>) => (
 export default function Navbar() {
   const theme = useTheme();
   const { mode, toggleMode } = useThemeMode();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -122,43 +121,47 @@ export default function Navbar() {
             </Typography>
           </Stack>
 
-          {!isMobile && (
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              sx={{
-                ml: { md: 2 },
-                mr: { md: 2 },
-                flex: 1,
-                justifyContent: "flex-end",
-              }}
-            >
-              {navLinks.map((link) => (
-                <Button
-                  key={link.id}
-                  color="inherit"
-                  onClick={() => scrollToId(link.id)}
-                  sx={{
-                    borderBottom: "2px solid",
-                    borderColor: "transparent",
-                    color: "text.primary",
-                    borderRadius: "var(--radius-pill)",
-                    width: navPillWidth,
-                    minWidth: navPillWidth,
-                    justifyContent: "center",
-                    fontSize: "0.9rem",
-                    fontWeight: 600,
-                    py: 0.9,
-                    px: 1.25,
-                    marginRight: "16px",
-                  }}
-                >
-                  {link.label}
-                </Button>
-              ))}
-            </Stack>
-          )}
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{
+              ml: { md: 2 },
+              mr: { md: 2 },
+              flex: 1,
+              justifyContent: "flex-end",
+              display: { xs: "none", md: "flex" },
+            }}
+          >
+            {navLinks.map((link) => (
+              <Button
+                key={link.id}
+                color="inherit"
+                component="a"
+                href={`#${link.id}`}
+                onClick={(event) => {
+                  event.preventDefault();
+                  scrollToId(link.id);
+                }}
+                sx={{
+                  borderBottom: "2px solid",
+                  borderColor: "transparent",
+                  color: "text.primary",
+                  borderRadius: "var(--radius-pill)",
+                  width: navPillWidth,
+                  minWidth: navPillWidth,
+                  justifyContent: "center",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  py: 0.9,
+                  px: 1.25,
+                  marginRight: "16px",
+                }}
+              >
+                {link.label}
+              </Button>
+            ))}
+          </Stack>
 
           <Stack
             direction="row"
@@ -166,33 +169,36 @@ export default function Navbar() {
             alignItems="center"
             sx={{ ml: { xs: "auto", md: 0 }, flexShrink: 0, gap: 2 }}
           >
-            {!isMobile && (
-              <Button
-                variant="contained"
-                onClick={() => scrollToId("review")}
-                sx={{
-                  width: navPillWidth,
-                  minWidth: navPillWidth,
-                  justifyContent: "center",
-                  fontSize: "0.9rem",
-                  fontWeight: "700",
-                }}
-              >
-                Request a Review
-              </Button>
-            )}
-            {isMobile && (
-              <IconButton
-                aria-label="Open menu"
-                onClick={() => setMobileOpen(true)}
-                sx={{
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: 2,
-                }}
-              >
-                <MenuIcon width={22} height={22} />
-              </IconButton>
-            )}
+            <Button
+              variant="contained"
+              component="a"
+              href="#review"
+              onClick={(event) => {
+                event.preventDefault();
+                scrollToId("review");
+              }}
+              sx={{
+                width: navPillWidth,
+                minWidth: navPillWidth,
+                justifyContent: "center",
+                fontSize: "0.9rem",
+                fontWeight: "700",
+                display: { xs: "none", md: "inline-flex" },
+              }}
+            >
+              Request a Review
+            </Button>
+            <IconButton
+              aria-label="Open menu"
+              onClick={() => setMobileOpen(true)}
+              sx={{
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: 2,
+                display: { xs: "inline-flex", md: "none" },
+              }}
+            >
+              <MenuIcon width={22} height={22} />
+            </IconButton>
             <IconButton
               aria-label="Toggle theme"
               onClick={toggleMode}
@@ -242,6 +248,8 @@ export default function Navbar() {
             {navLinks.map((link) => (
               <ListItemButton
                 key={link.id}
+                component="a"
+                href={`#${link.id}`}
                 onClick={() => {
                   scrollToId(link.id);
                   setMobileOpen(false);
@@ -253,6 +261,8 @@ export default function Navbar() {
           </List>
           <Button
             variant="contained"
+            component="a"
+            href="#review"
             onClick={() => {
               scrollToId("review");
               setMobileOpen(false);

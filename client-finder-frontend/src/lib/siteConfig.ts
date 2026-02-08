@@ -5,9 +5,10 @@ export const siteUrl = baseSiteUrl.replace(/\/$/, "");
 
 export const siteConfig = {
   siteName: "7-Day Website Rebuild",
+  seoTitle: "7-Day Website Rebuilds for Small Businesses | MI",
   tagline: "Conversion-focused sites delivered in one week",
   description:
-    "7-day conversion-focused website rebuilds for small businesses. Clearer messaging, faster load times, SEO tuning, and analytics so you get more calls and form submissions.",
+    "7-day conversion-focused website rebuilds for small businesses. Clear messaging, faster load times, SEO tuning, and analytics that drive real inquiries.",
   orgName: "M. I. Website Rebuilds",
   logoPath: "/assets/MILogo.png",
   faviconPath: "/assets/favicon.ico",

@@ -35,7 +35,7 @@ export default function LazyMount({ fallback = null, children, rootMargin = "300
   }, [show, rootMargin]);
 
   return (
-    <div ref={ref} id={!show ? anchorId : undefined} style={{ minHeight: 1 }}>
+    <div ref={ref} id={!show ? anchorId : undefined} className="lazy-mount-anchor">
       {show ? children : fallback}
     </div>
   );

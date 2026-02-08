@@ -82,6 +82,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.theme-pending {
+  visibility: hidden;
+}
+
+.theme-ready {
+  visibility: visible;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -117,6 +125,10 @@ a {
 
 .ui-flow > * + * {
   margin-top: 16px;
+}
+
+.lazy-mount-anchor {
+  min-height: 1px;
 }
 
 @media (min-width: 900px) {

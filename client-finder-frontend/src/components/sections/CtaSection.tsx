@@ -122,7 +122,8 @@ export default function CtaSection() {
     <Section
       id="review"
       eyebrow="Contact"
-      title="Request 5-minute review"
+      title="Request a 5-Minute Website Review"
+      titleAs="h2"
       subtitle="You’ll get: 3 priority fixes + a suggested next step."
       variant="paper"
       disableSpine
