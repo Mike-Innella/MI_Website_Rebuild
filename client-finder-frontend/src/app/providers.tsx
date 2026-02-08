@@ -32,7 +32,6 @@ const getSystemMode = () => {
 
 export default function Providers({ children }) {
   const [mode, setMode] = React.useState<ThemeMode>("light");
-  const [isThemeReady, setIsThemeReady] = React.useState(false);
   const userPreferenceRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -40,7 +39,6 @@ export default function Providers({ children }) {
     if (saved) {
       userPreferenceRef.current = true;
       setMode(saved);
-      setIsThemeReady(true);
       return;
     }
 
@@ -50,7 +48,6 @@ export default function Providers({ children }) {
     } else {
       setMode(getSystemMode());
     }
-    setIsThemeReady(true);
   }, []);
 
   React.useEffect(() => {
@@ -101,9 +98,7 @@ export default function Providers({ children }) {
       <ThemeRegistry>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <div className={isThemeReady ? "theme-ready" : "theme-pending"}>
-            {children}
-          </div>
+          {children}
         </ThemeProvider>
       </ThemeRegistry>
     </ThemeModeContext.Provider>

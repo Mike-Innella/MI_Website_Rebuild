@@ -82,14 +82,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.theme-pending {
-  visibility: hidden;
-}
-
-.theme-ready {
-  visibility: visible;
-}
-
 * {
   box-sizing: border-box;
   padding: 0;
@@ -115,6 +107,14 @@ a {
 .reveal {
   animation: fadeUp 0.7s ease both;
   animation-delay: var(--delay, 0ms);
+}
+
+@media (max-width: 900px) {
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .ui-max {

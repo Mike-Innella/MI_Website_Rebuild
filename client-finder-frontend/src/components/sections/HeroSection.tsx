@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Box,
   Container,
@@ -7,7 +5,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import { maxHeroWidth, maxTextWidth, sectionPaddingY } from "@/lib/layoutTokens";
 
@@ -16,21 +13,18 @@ const heroOptions = [
     title: "My site needs credibility",
     caption:
       "You want it to look professional and trustworthy. Clean messaging, strong proof, and a modern layout make it feel legit.",
-    targetId: "review",
     cta: "Request 5-minute review",
   },
   {
     title: "My site isn’t getting inquiries",
     caption:
       "You want more people to contact you. I’ll point out the drop-off points and tighten the path to your CTA.",
-    targetId: "review",
     cta: "Request 5-minute review",
   },
   {
     title: "I’m ready to rebuild",
     caption:
       "You want a clear plan for the new site before starting. We’ll map pages, content priorities, and scope before design begins.",
-    targetId: "review",
     cta: "Request 5-minute review",
   },
 ];
@@ -54,29 +48,17 @@ const ArrowIcon = () => (
   </svg>
 );
 
-function scrollToId(id: string) {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
 export default function HeroSection() {
-  const theme = useTheme();
-
   return (
     <Box
       component="section"
       sx={{
         py: sectionPaddingY,
-        borderBottom: `1px solid ${theme.palette.divider}`,
+        borderBottom: "1px solid var(--divider)",
         position: "relative",
         overflow: "hidden",
         minHeight: { xs: "calc(100svh - 72px)", md: "auto" },
-        background:
-          theme.palette.mode === "dark"
-            ? `linear-gradient(180deg, rgba(93, 169, 255, 0.2) 0%, ${theme.palette.background.default} 100%)`
-            : `linear-gradient(180deg, rgba(11, 61, 145, 0.16) 0%, ${theme.palette.background.default} 100%)`,
+        background: "linear-gradient(180deg, var(--glow-1) 0%, var(--page-bg) 100%)",
       }}
     >
       <Box
@@ -87,10 +69,7 @@ export default function HeroSection() {
           width: { xs: 220, md: 320 },
           height: { xs: 220, md: 320 },
           borderRadius: "50%",
-          background:
-            theme.palette.mode === "dark"
-              ? "radial-gradient(circle, rgba(93, 169, 255, 0.35), transparent 70%)"
-              : "radial-gradient(circle, rgba(11, 61, 145, 0.24), transparent 70%)",
+          background: "radial-gradient(circle, var(--glow-1), transparent 70%)",
           opacity: 0.7,
         }}
       />
@@ -99,9 +78,7 @@ export default function HeroSection() {
           position: "absolute",
           inset: 0,
           background:
-            theme.palette.mode === "dark"
-              ? "radial-gradient(1200px at 20% -10%, rgba(93, 169, 255, 0.18), transparent 60%), radial-gradient(900px at 80% 0%, rgba(253, 186, 116, 0.12), transparent 55%)"
-              : "radial-gradient(1200px at 20% -10%, rgba(11, 61, 145, 0.16), transparent 60%), radial-gradient(900px at 80% 0%, rgba(249, 115, 22, 0.12), transparent 55%)",
+            "radial-gradient(1200px at 20% -10%, var(--glow-1), transparent 60%), radial-gradient(900px at 80% 0%, var(--glow-2), transparent 55%)",
           opacity: 0.65,
           pointerEvents: "none",
         }}
@@ -118,17 +95,13 @@ export default function HeroSection() {
                 lineHeight: 1.04,
                 maxWidth: { xs: "100%", md: maxTextWidth },
               }}
-              className="reveal"
             >
               7-Day Website Rebuilds for Small Businesses
             </Typography>
 
             <Typography
               variant="h6"
-              sx={{
-                maxWidth: maxTextWidth,
-                color: theme.palette.mode === "dark" ? "rgba(229, 231, 235, 0.82)" : "text.secondary",
-              }}
+              sx={{ maxWidth: maxTextWidth, color: "text.secondary" }}
               className="reveal"
               style={{ "--delay": "80ms" } as any}
             >
@@ -154,7 +127,7 @@ export default function HeroSection() {
             <Grid
               container
               spacing={{ xs: 2, md: 3 }}
-              sx={{ mt: 1, minHeight: { xs: 700, md: 0 } }}
+              sx={{ mt: 1 }}
               className="reveal"
               style={{ "--delay": "140ms" } as any}
             >
@@ -164,20 +137,13 @@ export default function HeroSection() {
                     component="a"
                     href="#review"
                     aria-label={`${option.title} - ${option.caption}`}
-                    onClick={(event) => {
-                      event.preventDefault();
-                      scrollToId(option.targetId);
-                    }}
                     sx={{
                       borderRadius: "var(--radius-card)",
                       p: { xs: 2.5, md: 3 },
                       height: "100%",
                       border: "1px solid",
                       borderColor: "divider",
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "rgba(17, 22, 31, 0.75)"
-                          : "rgba(255, 255, 255, 0.9)",
+                      backgroundColor: "var(--surface-1)",
                       cursor: "pointer",
                       display: "grid",
                       gap: 1,

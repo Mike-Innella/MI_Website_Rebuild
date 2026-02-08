@@ -20,7 +20,7 @@ export default function SevenDayChangesSection() {
           clear performance data from day one.
         </Typography>
         <Typography color="text.secondary">
-          You don't need to understand the tools - you just need a site that removes friction and shows you what's
+          You don&apos;t need to understand the tools - you just need a site that removes friction and shows you what&apos;s
           working.
         </Typography>
         <Box component="ol" sx={{ pl: 2.5, display: "grid", gap: 1.25 }}>
